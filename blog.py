@@ -15,14 +15,25 @@
 # limitations under the License.
 #
 import os
-
 import jinja2
 import webapp2
+
+from google.appengine.ext import db
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
+
+class Author(db.Model):
+    name = db.StringProperty(required = True)
+
+class Post(db.Model):
+    #author = db.ReferenceProperty(Author)
+    author = db.StringProperty()
+    title = db.StringProperty()
+    content = db.TextProperty()
+    created = db.DateTimeProperty(auto_now_add = True)
 
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -36,8 +47,22 @@ class Handler(webapp2.RequestHandler):
     
 class MainPage(Handler):
     def get(self):
-	self.render("index.html")
+	posts = db.GqlQuery("SELECT * FROM Post "
+			    "ORDER BY created DESC ")
+	self.render("index.html", posts = posts)
+
+class NewPostHandler(Handler):
+    def get(self):
+	self.render("newpost.html")
+
+    def post(self):
+	author = self.request.get("author")
+	title = self.request.get("title")
+	content = self.request.get("content")
+	Post(author = author, title = title, content = content).put()
+	self.redirect("/")
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage)
+    ('/', MainPage), ('/NewPost', NewPostHandler)
 ], debug=True)
