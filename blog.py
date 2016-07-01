@@ -24,10 +24,20 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
 
-class MainHandler(webapp2.RequestHandler):
+class Handler(webapp2.RequestHandler):
+    def write(self, *a, **kw):
+	self.response.out.write(*a, **kw)
+
+    def render_str(self, template, **params):
+	return (JINJA_ENVIRONMENT.get_template(template)).render(params)
+
+    def render(self, template, **kw):
+	self.write(self.render_str(template, **kw))
+    
+class MainPage(Handler):
     def get(self):
-        self.response.write('Hello world!')
+	self.render("index.html")
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainPage)
 ], debug=True)
