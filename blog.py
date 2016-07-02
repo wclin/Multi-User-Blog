@@ -2,13 +2,22 @@
 import os
 import jinja2
 import webapp2
+from libs.bcrypt import bcrypt
 
 from google.appengine.ext import db
+
+SECRET = open("secret.txt", "r").readline()
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
+
+def make_pw_hash(name, pwd):
+	return bcrypt.hashpw(name+pwd+SECRET, bcrypt.gensalt())
+
+def valid_pw(name, pwd, hashed):
+	return bcrypt.hashpw(name+pwd+SECRET, hashed) == hashed
 
 def render_str(template, **params):
 	t = JINJA_ENVIRONMENT.get_template(template)
@@ -74,13 +83,15 @@ class SignUp(Handler):
 
 	def post(self):
 		name = self.request.get("username")
-		pwdh = self.request.get("password")
+		pwd = self.request.get("password")
 		email = self.request.get("email")
-		#hash the pwd
+		# Hash the pwd
+		pwdh = make_pw_hash(name, pwd)
 		a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
 		a.put()
-		#Add cookie
-		self.response.headers.add_header('Set-Cookie', 'uname=%s' % str(a.name))
+		# Add cookie
+		token = make_pw_hash(str(a.name), '')
+		self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(a.name), token))
 		self.redirect("/Welcome")
 
 class Login(Handler):
@@ -89,19 +100,27 @@ class Login(Handler):
 
 	def post(self):
 		name = self.request.get("username")
-		pwdh = self.request.get("password")
+		pwd = self.request.get("password")
 		u = Author.get_by_key_name(name)
-		#hash the pwd
-		#Add cookie
-		self.response.headers.add_header('Set-Cookie', 'uname=%s' % str(u.name))
-		self.redirect("/Welcome")
+		# Verify pwd
+		if valid_pw(name, pwd, u.pwdh):
+			# Add cookie
+			token = make_pw_hash(str(u.name), '')
+			self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(u.name), token))
+			self.redirect("/Welcome")
+		else:
+			self.write("No~")
 
 class Welcome(Handler):
 	def get(self):
-		uname = self.request.cookies.get('uname')
+		cookie = self.request.cookies.get('uname')
+		uname, token = cookie.split('|')
 		u = Author.get_by_key_name(uname)
-		#need verify
-		self.render("welcome.html", username=str(u.name))
+		# Verify cookie
+		if u and valid_pw(uname, '', token):
+			self.render("welcome.html", username=str(u.name))
+		else: 
+			self.write("Nooooo")
 
 
 app = webapp2.WSGIApplication([
