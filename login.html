@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="blog-masthead">
+        <div class="container">
+            <nav class="blog-nav">
+                <a class="blog-nav-item" href="/">Home</a>
+                <a class="blog-nav-item" href="NewPost">New Post</a>
+                <a class="blog-nav-item" href="SignUp">Sign Up</a>
+                <a class="blog-nav-item active" href="Login">Login</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+
+    <div class="blog-header">
+        <h1 class="blog-title">The WCLin Blog</h1>
+        <p class="lead blog-description">The official example template of creating a blog with Bootstrap.</p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-8 blog-main">
+
+          <body>
+            <h2>Login</h2>
+            <form method="post">
+              <table>
+                <label>
+                  <td class="label">
+                    Username
+                  </td>
+                  <td>
+                    <input type="text" name="username" value="{{username}}">
+                  </td>
+                  <td class="error">
+                    {{error_username}}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label">
+                    Password
+                  </td>
+                  <td>
+                    <input type="password" name="password" value="">
+                  </td>
+                  <td class="error">
+                    {{error_password}}
+                  </td>
+                </tr>
+
+              </table>
+
+              <input type="submit">
+            </form>
+          </body>
+        </div><!-- /.blog-main -->
+      </div><!-- /.row -->
+    </div><!-- /.container -->
+{% endblock %}

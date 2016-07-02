@@ -1,19 +1,50 @@
 {% extends "index.html" %}
 
-{% block newpost %}
-<div class="post">
-  <div class="post-heading">
-    <div class="post-title">
-      {{p.title}}
-    </div>
-
-    <div class="post-date">
-      {{p.created.strftime("%b %d, %Y")}}
-    </div>
-  </div>
-
-  <div class="post-content">
-    {{p._render_text | safe}}
+{% block content %}
+<div class="blog-masthead">
+  <div class="container">
+    <nav class="blog-nav">
+      <a class="blog-nav-item" href="">Home</a>
+      <a class="blog-nav-item" href="NewPost">New Post</a>
+      <a class="blog-nav-item" href="SignUp">Sign Up</a>
+    </nav>
   </div>
 </div>
+
+<div class="container">
+
+  <div class="blog-header">
+    <h1 class="blog-title">The WCLin Blog</h1>
+    <p class="lead blog-description">The official example template of creating a blog with Bootstrap.</p>
+  </div>
+  <div class="row">
+
+    <div class="col-sm-8 blog-main">
+      <div class="post">
+        <div class="post-heading">
+          <div class="post-title">
+            {{p.title}}
+          </div>
+
+          <div class="post-date">
+            {{p.created.strftime("%b %d, %Y")}}
+          </div>
+        </div>
+
+        <div class="post-content">
+          {{p._render_text | safe}}
+        </div>
+      </div>
+
+      <nav>
+        <ul class="pager">
+            <li><a href="#">Previous</a></li>
+            <li><a href="#">Next</a></li>
+        </ul>
+      </nav>
+    </div><!-- /.blog-main -->
+  </div><!-- /.row -->
+
+</div><!-- /.container -->
+
 {% endblock %}

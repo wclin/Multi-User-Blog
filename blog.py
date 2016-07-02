@@ -24,8 +24,11 @@ class Handler(webapp2.RequestHandler):
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
 
-#class Author(db.Model):
-#	name = db.StringProperty(required = True)
+class Author(db.Model):
+	name = db.StringProperty(required = True)
+	pwdh = db.StringProperty(required = True)
+	eamil = db.StringProperty()
+	dscr = db.StringProperty() 
 
 def blog_key(name = 'default'):
 	return db.Key.from_path('blogs', name)
@@ -65,7 +68,42 @@ class NewPost(Handler):
 		p.put()
 		self.redirect("/%s" % str(p.key().id()))
 
+class SignUp(Handler):
+	def get(self):
+		self.render("signup.html")
+
+	def post(self):
+		name = self.request.get("username")
+		pwdh = self.request.get("password")
+		email = self.request.get("email")
+		#hash the pwd
+		a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
+		a.put()
+		#Add cookie
+		self.response.headers.add_header('Set-Cookie', 'uname=%s' % str(a.name))
+		self.redirect("/Welcome")
+
+class Login(Handler):
+	def get(self):
+		self.render("login.html")
+
+	def post(self):
+		name = self.request.get("username")
+		pwdh = self.request.get("password")
+		u = Author.get_by_key_name(name)
+		#hash the pwd
+		#Add cookie
+		self.response.headers.add_header('Set-Cookie', 'uname=%s' % str(u.name))
+		self.redirect("/Welcome")
+
+class Welcome(Handler):
+	def get(self):
+		uname = self.request.cookies.get('uname')
+		u = Author.get_by_key_name(uname)
+		#need verify
+		self.render("welcome.html", username=str(u.name))
+
 
 app = webapp2.WSGIApplication([
-	('/', MainPage), ('/NewPost', NewPost), ('/([0-9]+)', PostPage)
+	('/', MainPage), ('/Welcome', Welcome), ('/NewPost', NewPost), ('/SignUp', SignUp), ('/Login', Login), ('/([0-9]+)', PostPage)
 ], debug=True)

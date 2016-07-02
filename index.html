@@ -1,31 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="favicon.ico">
+{% extends "base.html" %}
 
-    <title>WCLin Blog</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="/css/bootstrap.css" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="/css/blog.css" rel="stylesheet">
-
-  </head>
-
-  <body>
-
+    {% block content %}
     <div class="blog-masthead">
       <div class="container">
         <nav class="blog-nav">
-          <a class="blog-nav-item active" href="#">Home</a>
+          <a class="blog-nav-item active" href="/">Home</a>
           <a class="blog-nav-item" href="NewPost">New Post</a>
+          <a class="blog-nav-item" href="SignUp">Sign Up</a>
+          <a class="blog-nav-item" href="Login">Login</a>
         </nav>
       </div>
     </div>
@@ -40,8 +22,6 @@
       <div class="row">
 
         <div class="col-sm-8 blog-main">
-          {% block newpost %}
-          {% endblock %}
           {% for post in posts %}
           <div class="blog-post">
             <h2 class="blog-post-title">{{post.title}} </h2>
@@ -85,20 +65,4 @@
       </div><!-- /.row -->
 
     </div><!-- /.container -->
-
-    <footer class="blog-footer">
-      <p>Powered by <a href="http://getbootstrap.com">Bootstrap</a> X <a href="https://github.com/wclin/">wclin</a>.</p>
-      <p>
-        <a href="#">Back to top</a>
-      </p>
-    </footer>
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="/js/bootstrap.js"></script>
-  </body>
-</html>
+    {% endblock %}
