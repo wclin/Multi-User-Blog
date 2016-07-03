@@ -101,7 +101,7 @@ class Login(Handler):
 	def post(self):
 		name = self.request.get("username")
 		pwd = self.request.get("password")
-		u = Author.get_by_key_name(name)
+		u = Author.get_by_key_name(name) if name!='' else None
 		# Verify pwd
 		if valid_pw(name, pwd, u.pwdh):
 			# Add cookie
@@ -111,11 +111,18 @@ class Login(Handler):
 		else:
 			self.write("No~")
 
+class Logout(Handler):
+	def get(self):
+		#self.request.cookies.clear()
+		self.response.headers.add_header('Set-Cookie', 'uname=%s' % '|')
+
+		self.redirect("/Login")
+
 class Welcome(Handler):
 	def get(self):
 		cookie = self.request.cookies.get('uname')
 		uname, token = cookie.split('|')
-		u = Author.get_by_key_name(uname)
+		u = Author.get_by_key_name(uname) if uname!='' else None
 		# Verify cookie
 		if u and valid_pw(uname, '', token):
 			self.render("welcome.html", username=str(u.name))
@@ -124,5 +131,5 @@ class Welcome(Handler):
 
 
 app = webapp2.WSGIApplication([
-	('/', MainPage), ('/Welcome', Welcome), ('/NewPost', NewPost), ('/SignUp', SignUp), ('/Login', Login), ('/([0-9]+)', PostPage)
+	('/', MainPage), ('/Welcome', Welcome), ('/NewPost', NewPost), ('/SignUp', SignUp), ('/Login', Login), ('/Logout', Logout), ('/([0-9]+)', PostPage)
 ], debug=True)
