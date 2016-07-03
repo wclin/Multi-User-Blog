@@ -62,7 +62,13 @@ class Post(db.Model):
 
 class MainPage(Handler):
 	def get(self):
-		#posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
+		author = self.getValidName()
+		# Get post from the author only
+		posts = Post.all().order('-created')
+		self.render("index.html", author = author, posts = posts)
+
+class Timeline(Handler):
+	def get(self):
 		posts = Post.all().order('-created')
 		self.render("index.html", author = self.getValidName(), posts = posts)
 
@@ -70,6 +76,7 @@ class PostPage(Handler):
 	def get(self, post_id):
 		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
 		post = db.get(key)
+		# So weird \/
 		self.render("permalink.html", post = post)
 
 class NewPost(Handler):
@@ -77,7 +84,6 @@ class NewPost(Handler):
 		self.render("newpost.html", author = self.getValidName())
 
 	def post(self):
-		#author = self.request.get("author")
 		uname = self.getValidName()
 		title = self.request.get("title")
 		content = self.request.get("content")
@@ -96,11 +102,10 @@ class SignUp(Handler):
 		name = self.request.get("username")
 		pwd = self.request.get("password")
 		email = self.request.get("email")
-		# Hash the pwd
 		pwdh = make_pw_hash(name, pwd)
+		# Check if name is usable
 		a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
 		a.put()
-		# Add cookie
 		token = make_pw_hash(str(a.name), '')
 		self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(a.name), token))
 		self.redirect("/Welcome")
@@ -113,9 +118,7 @@ class Login(Handler):
 		name = self.request.get("username")
 		pwd = self.request.get("password")
 		u = Author.get_by_key_name(name) if name!='' else None
-		# Verify pwd
 		if valid_pw(name, pwd, u.pwdh):
-			# Add cookie
 			token = make_pw_hash(str(u.name), '')
 			self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(u.name), token))
 			self.redirect("/Welcome")
@@ -124,23 +127,17 @@ class Login(Handler):
 
 class Logout(Handler):
 	def get(self):
-		#self.request.cookies.clear()
 		self.response.headers.add_header('Set-Cookie', 'uname=%s' % '|')
-
 		self.redirect("/Login")
 
 class Welcome(Handler):
 	def get(self):
-		cookie = self.request.cookies.get('uname')
-		uname, token = cookie.split('|')
-		u = Author.get_by_key_name(uname) if uname!='' else None
-		# Verify cookie
-		if u and valid_pw(uname, '', token):
+		if self.getValidName():
 			self.redirect("/")
 		else: 
 			self.write("Nooooo")
 
 
 app = webapp2.WSGIApplication([
-	('/', MainPage), ('/Welcome', Welcome), ('/NewPost', NewPost), ('/SignUp', SignUp), ('/Login', Login), ('/Logout', Logout), ('/([0-9]+)', PostPage)
+	('/', MainPage), ('/Timeline', Timeline), ('/Welcome', Welcome), ('/NewPost', NewPost), ('/SignUp', SignUp), ('/Login', Login), ('/Logout', Logout), ('/([0-9]+)', PostPage)
 ], debug=True)
