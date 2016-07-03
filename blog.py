@@ -136,7 +136,7 @@ class Welcome(Handler):
 		u = Author.get_by_key_name(uname) if uname!='' else None
 		# Verify cookie
 		if u and valid_pw(uname, '', token):
-			self.render("welcome.html", username=str(u.name))
+			self.redirect("/")
 		else: 
 			self.write("Nooooo")
 
