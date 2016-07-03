@@ -32,6 +32,13 @@ class Handler(webapp2.RequestHandler):
 
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
+	
+	def getValidName(self): # return valid name or None
+		cookie = self.request.cookies.get('uname')
+		uname, token = cookie.split('|')
+		u = Author.get_by_key_name(uname) if uname!='' else None
+		return uname if u and valid_pw(uname, '', token) else None
+
 
 class Author(db.Model):
 	name = db.StringProperty(required = True)
@@ -51,13 +58,13 @@ class Post(db.Model):
 
 	def render(self):
 		self._render_text = self.content.replace('\n', '<br>')
-		return render_str("post.html", p = self)
+		return render_str("post.html", author = self.getValidName(), p = self)
 
 class MainPage(Handler):
 	def get(self):
 		#posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
 		posts = Post.all().order('-created')
-		self.render("index.html", posts = posts)
+		self.render("index.html", author = self.getValidName(), posts = posts)
 
 class PostPage(Handler):
 	def get(self, post_id):
@@ -67,19 +74,23 @@ class PostPage(Handler):
 
 class NewPost(Handler):
 	def get(self):
-		self.render("newpost.html")
+		self.render("newpost.html", author = self.getValidName())
 
 	def post(self):
-		author = self.request.get("author")
+		#author = self.request.get("author")
+		uname = self.getValidName()
 		title = self.request.get("title")
 		content = self.request.get("content")
-		p = Post(parent = blog_key(), author = author, title = title, content = content)
-		p.put()
-		self.redirect("/%s" % str(p.key().id()))
+		if uname:
+			p = Post(parent = blog_key(), author = uname, title = title, content = content)
+			p.put()
+			self.redirect("/%s" % str(p.key().id()))
+		else:
+			self.write("No valid yo")
 
 class SignUp(Handler):
 	def get(self):
-		self.render("signup.html")
+		self.render("signup.html", author = self.getValidName())
 
 	def post(self):
 		name = self.request.get("username")
@@ -96,7 +107,7 @@ class SignUp(Handler):
 
 class Login(Handler):
 	def get(self):
-		self.render("login.html")
+		self.render("login.html", author = self.getValidName())
 
 	def post(self):
 		name = self.request.get("username")
