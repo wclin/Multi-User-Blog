@@ -23,6 +23,9 @@ def render_str(template, **params):
 	t = JINJA_ENVIRONMENT.get_template(template)
 	return t.render(params)
 
+def blog_key(name = 'default'):
+	return db.Key.from_path('blogs', name)
+
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
 		self.response.out.write(*a, **kw)
@@ -33,15 +36,22 @@ class Handler(webapp2.RequestHandler):
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
 	
-	def getValidName(self): # return valid name or None
+	def getName(self): # return valid name or None
+		user = self.getUser()
+		return user.name if user else None
+
+	def getUser(self): # return Author or None
 		cookie = self.request.cookies.get('uname')
 		uname, token = cookie.split('|')
-		u = Author.get_by_key_name(uname) if uname!='' else None
-		return uname if u and valid_pw(uname, '', token) else None
-
-	def getAuthor(self): # return Author or None
-		uname = self.getValidName()
+		uname = uname if uname != '' and valid_pw(uname, '', token) else None
 		return Author.get_by_key_name(uname) if uname else None
+
+	def setName(self, user = None): # set Uname Cookie	from Author
+		if user:
+			token = make_pw_hash(str(user.name), '')
+			self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(user.name), token))
+		else:
+			self.response.headers.add_header('Set-Cookie', 'uname=%s' % '|')
 
 
 class Author(db.Model):
@@ -50,12 +60,8 @@ class Author(db.Model):
 	eamil = db.StringProperty()
 	dscr = db.StringProperty() 
 
-def blog_key(name = 'default'):
-	return db.Key.from_path('blogs', name)
-
 class Post(db.Model):
 	author = db.ReferenceProperty(Author)
-	#author = db.StringProperty()
 	title = db.StringProperty()
 	content = db.TextProperty()
 	created = db.DateTimeProperty(auto_now_add = True)
@@ -66,16 +72,14 @@ class Post(db.Model):
 
 class MainPage(Handler):
 	def get(self):
-		author = self.getAuthor()
-		# Get post from the author only
-		#posts = Post.all().order('-created')
-		posts = Post.all().filter('author =', author)
+		author = self.getUser()
+		posts = Post.all().filter('author =', author).order('-created')
 		self.render("index.html", author = author.name, posts = posts)
 
 class Timeline(Handler):
 	def get(self):
 		posts = Post.all().order('-created')
-		self.render("index.html", author = self.getValidName(), posts = posts)
+		self.render("timeline.html", author = self.getName(), posts = posts)
 
 class PostPage(Handler):
 	def get(self, post_id):
@@ -86,10 +90,10 @@ class PostPage(Handler):
 
 class NewPost(Handler):
 	def get(self):
-		self.render("newpost.html", author = self.getValidName())
+		self.render("newpost.html", author = self.getName())
 
 	def post(self):
-		author = self.getAuthor()
+		author = self.getUser()
 		title = self.request.get("title")
 		content = self.request.get("content")
 		if author:
@@ -101,43 +105,45 @@ class NewPost(Handler):
 
 class SignUp(Handler):
 	def get(self):
-		self.render("signup.html", author = self.getValidName())
+		self.render("signup.html", author = self.getName())
 
 	def post(self):
 		name = self.request.get("username")
+		# Password verify twice
 		pwd = self.request.get("password")
 		email = self.request.get("email")
 		pwdh = make_pw_hash(name, pwd)
-		# Check if name is usable
-		a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
-		a.put()
-		token = make_pw_hash(str(a.name), '')
-		self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(a.name), token))
-		self.redirect("/Welcome")
+		a = Author.get_by_key_name(name)
+		if a:
+			self.write("Already been used lwo")
+		else :
+			a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
+			a.put()
+			self.setName(a)
+			self.redirect("/Welcome")
 
 class Login(Handler):
 	def get(self):
-		self.render("login.html", author = self.getValidName())
+		self.render("login.html", author = self.getName())
 
 	def post(self):
 		name = self.request.get("username")
 		pwd = self.request.get("password")
 		u = Author.get_by_key_name(name) if name!='' else None
 		if valid_pw(name, pwd, u.pwdh):
-			token = make_pw_hash(str(u.name), '')
-			self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(u.name), token))
+			self.setName(u)
 			self.redirect("/Welcome")
 		else:
 			self.write("No~")
 
 class Logout(Handler):
 	def get(self):
-		self.response.headers.add_header('Set-Cookie', 'uname=%s' % '|')
+		self.setName()
 		self.redirect("/Login")
 
 class Welcome(Handler):
 	def get(self):
-		if self.getValidName():
+		if self.getName():
 			self.redirect("/")
 		else: 
 			self.write("Nooooo")
