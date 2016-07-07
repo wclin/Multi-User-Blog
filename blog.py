@@ -39,6 +39,10 @@ class Handler(webapp2.RequestHandler):
 		u = Author.get_by_key_name(uname) if uname!='' else None
 		return uname if u and valid_pw(uname, '', token) else None
 
+	def getAuthor(self): # return Author or None
+		uname = self.getValidName()
+		return Author.get_by_key_name(uname) if uname else None
+
 
 class Author(db.Model):
 	name = db.StringProperty(required = True)
@@ -50,22 +54,23 @@ def blog_key(name = 'default'):
 	return db.Key.from_path('blogs', name)
 
 class Post(db.Model):
-	#author = db.ReferenceProperty(Author)
-	author = db.StringProperty()
+	author = db.ReferenceProperty(Author)
+	#author = db.StringProperty()
 	title = db.StringProperty()
 	content = db.TextProperty()
 	created = db.DateTimeProperty(auto_now_add = True)
 
 	def render(self):
 		self._render_text = self.content.replace('\n', '<br>')
-		return render_str("post.html", author = self.getValidName(), p = self)
+		return render_str("post.html", author = self.author, p = self)
 
 class MainPage(Handler):
 	def get(self):
-		author = self.getValidName()
+		author = self.getAuthor()
 		# Get post from the author only
-		posts = Post.all().order('-created')
-		self.render("index.html", author = author, posts = posts)
+		#posts = Post.all().order('-created')
+		posts = Post.all().filter('author =', author)
+		self.render("index.html", author = author.name, posts = posts)
 
 class Timeline(Handler):
 	def get(self):
@@ -84,11 +89,11 @@ class NewPost(Handler):
 		self.render("newpost.html", author = self.getValidName())
 
 	def post(self):
-		uname = self.getValidName()
+		author = self.getAuthor()
 		title = self.request.get("title")
 		content = self.request.get("content")
-		if uname:
-			p = Post(parent = blog_key(), author = uname, title = title, content = content)
+		if author:
+			p = Post(parent = blog_key(), author = author, title = title, content = content)
 			p.put()
 			self.redirect("/%s" % str(p.key().id()))
 		else:
