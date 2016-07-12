@@ -1,19 +1,9 @@
 {% extends "base.html" %}
 
-{% block content %}
-    <div class="blog-masthead">
-        <div class="container">
-            <nav class="blog-nav">
-                <a class="blog-nav-item" href="/">{{author}}</a>
-                <a class="blog-nav-item" href="Timeline">Timeline</a>
-                <a class="blog-nav-item" href="NewPost">New Post</a>
-                <a class="blog-nav-item" href="SignUp">Sign Up</a>
-                <a class="blog-nav-item active" href="Login">Login</a>
-                <a class="blog-nav-item" href="Logout">Logout</a>
-            </nav>
-        </div>
-    </div>
+{% set active_page = 'login' %}
+{% set author = author %}
 
+{% block content %}
     <div class="container">
 
     <div class="blog-header">

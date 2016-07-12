@@ -28,25 +28,21 @@
       ('Login', 'login', 'Login'),
       ('Logout', 'logout', 'Logout')
     ] -%}
-    {% block active_page %}
-    {% endblock %}
 
-    <ul id="navigation">
-
-      <li{% if id == active_page %} class="active"{% endif
-      %}><a href="{{ href|e }}">{{ caption|e }}</a></li>
-      {% endfor %}
-    </ul>
     <div class="blog-masthead">
       <div class="container">
         <nav class="blog-nav">
           {% for href, id, caption in navigation_bar %}
-            <a class="blog-nav-item active" href="/"></a>
-          <a class="blog-nav-item" href="Timeline">Timeline</a>
-          <a class="blog-nav-item" href="NewPost">New Post</a>
-          <a class="blog-nav-item" href="SignUp">Sign Up</a>
-          <a class="blog-nav-item" href="Login">Login</a>
-          <a class="blog-nav-item" href="Logout">Logout</a>
+            <a
+              {% if id == active_page %}
+                class="blog-nav-item active"
+              {% endif %}
+              {% if id != active_page %}
+                class="blog-nav-item"
+              {% endif %}
+            href="{{ href|e }}">{{ caption|e }}
+            </a>
+          {% endfor %}
         </nav>
       </div>
     </div>
