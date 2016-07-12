@@ -42,7 +42,7 @@ class Handler(webapp2.RequestHandler):
 
 	def getUser(self): # return Author or None
 		cookie = self.request.cookies.get('uname')
-		uname, token = cookie.split('|')
+		uname, token = cookie.split('|') if cookie else ('', None)
 		uname = uname if uname != '' and valid_pw(uname, '', token) else None
 		return Author.get_by_key_name(uname) if uname else None
 
@@ -73,8 +73,11 @@ class Post(db.Model):
 class MainPage(Handler):
 	def get(self):
 		author = self.getUser()
-		posts = Post.all().filter('author =', author).order('-created')
-		self.render("index.html", author = author.name, posts = posts)
+		if author:
+			posts = Post.all().filter('author =', author).order('-created')
+			self.render("index.html", author = self.getName(), posts = posts)
+		else:
+			self.redirect("/Login")
 
 class Timeline(Handler):
 	def get(self):
@@ -90,7 +93,11 @@ class PostPage(Handler):
 
 class NewPost(Handler):
 	def get(self):
-		self.render("newpost.html", author = self.getName())
+		if self.getUser():
+			self.render("newpost.html", author = self.getName())
+		else:
+			#self.write("Login first yo")
+			self.redirect("/Login")
 
 	def post(self):
 		author = self.getUser()

@@ -1,19 +1,10 @@
 {% extends "base.html" %}
 
-    {% block content %}
-    <div class="blog-masthead">
-      <div class="container">
-        <nav class="blog-nav">
-          <a class="blog-nav-item active" href="/">{{author}}</a>
-          <a class="blog-nav-item" href="Timeline">Timeline</a>
-          <a class="blog-nav-item" href="NewPost">New Post</a>
-          <a class="blog-nav-item" href="SignUp">Sign Up</a>
-          <a class="blog-nav-item" href="Login">Login</a>
-          <a class="blog-nav-item" href="Logout">Logout</a>
-        </nav>
-      </div>
-    </div>
+    {% block active_page %}
+    {% set active_page = active_page|default('index') -%}
+    {% end block %}
 
+    {% block content %}
     <div class="container">
 
       <div class="blog-header">
