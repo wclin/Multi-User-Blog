@@ -26,7 +26,16 @@ def render_str(template, **params):
 def blog_key(name = 'default'):
 	return db.Key.from_path('blogs', name)
 
+class Alert():
+	# ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
+	def __init__(self, category = None, message = None):
+		self.up = True if category and message else False
+		self.category = category
+		self.message = message
+
 class Handler(webapp2.RequestHandler):
+	def __init__(self):
+		alert = Alert()
 	def write(self, *a, **kw):
 		self.response.out.write(*a, **kw)
 

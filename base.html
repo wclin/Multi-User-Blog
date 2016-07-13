@@ -46,8 +46,16 @@
         </nav>
       </div>
     </div>
+    {% if alert_up %}
+      <div class="alert {{alert_type}} fade in">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          {{alert_message}}
+      </div>
+    {% endif %}
+
     {% block content %}
     {% endblock %}
+
     <footer class="blog-footer">
       <p>Powered by <a href="http://getbootstrap.com">Bootstrap</a> X <a href="https://github.com/wclin/">wclin</a>.</p>
       <p>

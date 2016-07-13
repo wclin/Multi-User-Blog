@@ -3,3 +3,4 @@ node_modules/
 hw3/
 secret.txt
 libs/
+*.swp
