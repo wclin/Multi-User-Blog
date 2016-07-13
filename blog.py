@@ -137,7 +137,7 @@ class Login(Handler):
 		name = self.request.get("username")
 		pwd = self.request.get("password")
 		u = Author.get_by_key_name(name) if name!='' else None
-		if valid_pw(name, pwd, u.pwdh):
+		if u and valid_pw(name, pwd, u.pwdh):
 			self.setName(u)
 			self.redirect("/Welcome")
 		else:
