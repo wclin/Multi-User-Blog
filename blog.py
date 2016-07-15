@@ -28,14 +28,24 @@ def blog_key(name = 'default'):
 
 class Alert():
 	# ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
-	def __init__(self, category = None, message = None):
-		self.up = True if category and message else False
+	def __init__(self, up = False, category = None, message = None):
+		self.up = up
 		self.category = category
 		self.message = message
 
+	@classmethod
+	def set(cls, category, message):
+		a = cls()
+		a.up = True
+		a.category = category
+		a.message = message
+		return a
+
 class Handler(webapp2.RequestHandler):
-	def __init__(self):
-		alert = Alert()
+	def __init__(self, request, response):
+		self.initialize(request, response)
+		self.alert = None
+
 	def write(self, *a, **kw):
 		self.response.out.write(*a, **kw)
 
@@ -140,7 +150,10 @@ class SignUp(Handler):
 
 class Login(Handler):
 	def get(self):
-		self.render("login.html", author = self.getName())
+		self.alert = Alert.set('alert-info', 'Welcome~')
+		self.render("login.html", author = self.getName(), alert = self.alert)
+		#if self.alert:
+		#	self.alert.up = False
 
 	def post(self):
 		name = self.request.get("username")

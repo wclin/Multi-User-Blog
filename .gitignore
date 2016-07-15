@@ -4,3 +4,5 @@ hw3/
 secret.txt
 libs/
 *.swp
+*.swp
+*.py.swp

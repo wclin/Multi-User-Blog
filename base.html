@@ -36,8 +36,7 @@
             <a
               {% if id == active_page %}
                 class="blog-nav-item active"
-              {% endif %}
-              {% if id != active_page %}
+              {% else %}
                 class="blog-nav-item"
               {% endif %}
             href="{{ href|e }}">{{ caption|e }}
@@ -46,10 +45,10 @@
         </nav>
       </div>
     </div>
-    {% if alert_up %}
-      <div class="alert {{alert_type}} fade in">
+    {% if alert.up %}
+      <div class="alert {{alert.category}} fade in">
           <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-          {{alert_message}}
+          {{alert.message}}
       </div>
     {% endif %}
 
