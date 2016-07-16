@@ -2,7 +2,9 @@
 import os
 import jinja2
 import webapp2
+import urllib
 from libs.bcrypt import bcrypt
+import Queue
 
 from google.appengine.ext import db
 
@@ -13,30 +15,23 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
 
+#ALERT = Queue.Queue()
+
 def make_pw_hash(name, pwd):
 	return bcrypt.hashpw(name+pwd+SECRET, bcrypt.gensalt())
 
 def valid_pw(name, pwd, hashed):
 	return bcrypt.hashpw(name+pwd+SECRET, hashed) == hashed
 
-def render_str(template, **params):
-	t = JINJA_ENVIRONMENT.get_template(template)
-	return t.render(params)
 
 def blog_key(name = 'default'):
 	return db.Key.from_path('blogs', name)
 
-class Alert():
+class Alert(): # Or maybe __init__ is fine
 	# ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
-	def __init__(self, up = False, category = None, message = None):
-		self.up = up
-		self.category = category
-		self.message = message
-
 	@classmethod
 	def set(cls, category, message):
 		a = cls()
-		a.up = True
 		a.category = category
 		a.message = message
 		return a
@@ -71,6 +66,11 @@ class Handler(webapp2.RequestHandler):
 			self.response.headers.add_header('Set-Cookie', 'uname=%s|%s' % (str(user.name), token))
 		else:
 			self.response.headers.add_header('Set-Cookie', 'uname=%s' % '|')
+	
+	def getAlert(self):
+		message = self.request.get('message')
+		category = self.request.get('category')
+		return Alert.set(category, message)
 
 
 class Author(db.Model):
@@ -87,33 +87,63 @@ class Post(db.Model):
 
 	def render(self):
 		self._render_text = self.content.replace('\n', '<br>')
-		return render_str("post.html", author = self.author, p = self)
+		template_values = {
+				'user': self.getName(),
+				'alert': self.getAlert(),
+		}
+		template = JINJA_ENVIRONMENT.get_template('login.html')
+		self.response.write(template.render(template_values))
+		#return render_str("post.html", author = self.author, p = self)
 
 class MainPage(Handler):
 	def get(self):
 		author = self.getUser()
 		if author:
 			posts = Post.all().filter('author =', author).order('-created')
-			self.render("index.html", author = self.getName(), posts = posts)
+			template_values = {
+					'user': self.getName(),
+					'alert': self.getAlert(),
+			}
+			template = JINJA_ENVIRONMENT.get_template('login.html')
+			self.response.write(template.render(template_values))
+			#self.render("index.html", author = self.getName(), posts = posts)
 		else:
 			self.redirect("/Login")
 
 class Timeline(Handler):
 	def get(self):
 		posts = Post.all().order('-created')
-		self.render("timeline.html", author = self.getName(), posts = posts)
+		template_values = {
+				'user': self.getName(),
+				'alert': self.getAlert(),
+		}
+		template = JINJA_ENVIRONMENT.get_template('login.html')
+		self.response.write(template.render(template_values))
+		#self.render("timeline.html", author = self.getName(), posts = posts)
 
 class PostPage(Handler):
 	def get(self, post_id):
 		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
 		post = db.get(key)
 		# So weird \/
-		self.render("permalink.html", post = post)
+		template_values = {
+				'user': self.getName(),
+				'alert': self.getAlert(),
+		}
+		template = JINJA_ENVIRONMENT.get_template('login.html')
+		self.response.write(template.render(template_values))
+		#self.render("permalink.html", post = post)
 
 class NewPost(Handler):
 	def get(self):
 		if self.getUser():
-			self.render("newpost.html", author = self.getName())
+			template_values = {
+					'user': self.getName(),
+					'alert': self.getAlert(),
+			}
+			template = JINJA_ENVIRONMENT.get_template('login.html')
+			self.response.write(template.render(template_values))
+			#self.render("newpost.html", author = self.getName())
 		else:
 			#self.write("Login first yo")
 			self.redirect("/Login")
@@ -131,7 +161,13 @@ class NewPost(Handler):
 
 class SignUp(Handler):
 	def get(self):
-		self.render("signup.html", author = self.getName())
+		template_values = {
+				'user': self.getName(),
+				'alert': self.getAlert(),
+		}
+		template = JINJA_ENVIRONMENT.get_template('signup.html')
+		self.response.write(template.render(template_values))
+		#self.render("signup.html", author = self.getName())
 
 	def post(self):
 		name = self.request.get("username")
@@ -150,10 +186,13 @@ class SignUp(Handler):
 
 class Login(Handler):
 	def get(self):
-		self.alert = Alert.set('alert-info', 'Welcome~')
-		self.render("login.html", author = self.getName(), alert = self.alert)
-		#if self.alert:
-		#	self.alert.up = False
+		template_values = {
+				'user': self.getName(),
+				'alert': self.getAlert(),
+		}
+		template = JINJA_ENVIRONMENT.get_template('login.html')
+		self.response.write(template.render(template_values))
+		#self.render("login.html", template_values)
 
 	def post(self):
 		name = self.request.get("username")
@@ -163,7 +202,8 @@ class Login(Handler):
 			self.setName(u)
 			self.redirect("/Welcome")
 		else:
-			self.write("No~")
+			alert = dict(category="alert-warning", message="No~")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
 
 class Logout(Handler):
 	def get(self):

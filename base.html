@@ -21,7 +21,7 @@
 
   <body>
     {% set navigation_bar = [
-      ('/', 'index', author ),
+      ('/', 'index', user ),
       ('Timeline', 'timeline', 'Timeline'),
       ('NewPost', 'newpost', 'NewPost'),
       ('SignUp', 'signup', 'SignUp'),
@@ -45,7 +45,7 @@
         </nav>
       </div>
     </div>
-    {% if alert.up %}
+    {% if alert %}
       <div class="alert {{alert.category}} fade in">
           <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
           {{alert.message}}
