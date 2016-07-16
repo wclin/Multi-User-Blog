@@ -16,8 +16,14 @@
         <div class="col-sm-8 blog-main">
           {% for post in posts %}
           <div class="blog-post">
-            <h2 class="blog-post-title">{{post.title}} </h2>
-            <a href="/{{post.key().id()}}" class="blog-post-meta">{{post.key().id()}} </a>
+            <h2 class="blog-post-title">{{post.title}}</h2>
+            <p class="blog-post-meta">{{post.likes}}
+            {% if post.isLiked %}
+              <a href="/UnLike?post_id={{post.key().id()}}" class="blog-post-meta">UnLike</a>
+            {% else %}
+              <a href="/Like?post_id={{post.key().id()}}" class="blog-post-meta">Like</a>
+            {% endif %}
+            <a href="/{{post.key().id()}}" class="blog-post-meta">{{post.key().id()}} </a></p>
             <p class="blog-post-meta">{{post.created}} by <a href="#">{{post.author.name}}</a></p>
             {{post.content}}
           </div><!-- /.blog-post -->

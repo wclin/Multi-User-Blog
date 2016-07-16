@@ -82,6 +82,10 @@ class Handler(webapp2.RequestHandler):
 		alert = dict(category="alert-danger", message="It's not your post!")
 		self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 
+	def isLiked(self, p):
+		u = self.getUser()
+		return Likes.all().filter('user =', u).filter('post =', p).get()
+
 
 class Author(db.Model):
 	name = db.StringProperty(required = True)
@@ -94,6 +98,8 @@ class Post(db.Model):
 	title = db.StringProperty()
 	content = db.TextProperty()
 	created = db.DateTimeProperty(auto_now_add = True)
+	likes = db.IntegerProperty(default=0)
+	isLiked = db.BooleanProperty()
 
 	def render(self, template_values):
 		self._render_text = self.content.replace('\n', '<br>')
@@ -106,6 +112,10 @@ class Post(db.Model):
 		#self.response.write(template.render(template_values))
 		return template.render(template_values)
 		#return render_str("post.html", template_values)
+
+class Likes(db.Model):
+	user = db.ReferenceProperty(Author)
+	post = db.ReferenceProperty(Post)
 
 class MainPage(Handler):
 	def get(self):
@@ -126,14 +136,45 @@ class MainPage(Handler):
 
 class Timeline(Handler):
 	def get(self):
+		posts = Post.all().order('-created').fetch(limit=100)
+		for post in posts:
+			post.isLiked = True if self.isLiked(post) else False
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
-				'posts': Post.all().order('-created')
+				'posts': posts
 		}
 		template = JINJA_ENVIRONMENT.get_template('timeline.html')
 		self.response.write(template.render(template_values))
 		#self.render("timeline.html", author = self.getName(), posts = posts)
+
+class Like(Handler):
+	def get(self):
+		p = self.getPost()
+		if self.isLiked(p):
+			alert = dict(category="alert-danger", message="Already liked!!")
+			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+			return
+		l = Likes(user = self.getUser(), post = p)
+		l.put()
+		p.likes = p.likes + 1
+		p.put()
+		alert = dict(category="alert-success", message="Like!!")
+		self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+
+class UnLike(Handler):
+	def get(self):
+		p = self.getPost()
+		if not self.isLiked(p):
+			alert = dict(category="alert-danger", message="Didn't like yet!!")
+			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+			return
+		l = Likes.all().filter('user =', self.getUser()).filter('post =', p).get()
+		l.delete()
+		p.likes = p.likes - 1
+		p.put()
+		alert = dict(category="alert-success", message="UnLike!!")
+		self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 
 class PostPage(Handler):
 	def get(self, post_id):
@@ -218,6 +259,7 @@ class NewPost(Handler):
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
 			#self.write("No valid yo")
 
+
 class SignUp(Handler):
 	def get(self):
 		template_values = {
@@ -292,6 +334,8 @@ app = webapp2.WSGIApplication([
 	('/NewPost', NewPost), 
 	('/EditPost', EditPost), 
 	('/DeletePost', DeletePost), 
+	('/Like', Like),
+	('/UnLike', UnLike),
 	('/SignUp', SignUp), 
 	('/Login', Login), 
 	('/Logout', Logout), 
