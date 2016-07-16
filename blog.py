@@ -21,9 +21,12 @@ def make_pw_hash(name, pwd):
 def valid_pw(name, pwd, hashed):
 	return bcrypt.hashpw(name+pwd+SECRET, hashed) == hashed
 
-
 def blog_key(name = 'default'):
 	return db.Key.from_path('blogs', name)
+
+def render_str(template, **params): # used by permalink post.render()
+	t = JINJA_ENVIRONMENT.get_template(template)
+	return t.render(params)
 
 class Alert(): # Or maybe __init__ is fine
 	# ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
@@ -70,7 +73,6 @@ class Handler(webapp2.RequestHandler):
 		category = self.request.get('category')
 		return Alert.set(category, message)
 
-
 class Author(db.Model):
 	name = db.StringProperty(required = True)
 	pwdh = db.StringProperty(required = True)
@@ -83,16 +85,17 @@ class Post(db.Model):
 	content = db.TextProperty()
 	created = db.DateTimeProperty(auto_now_add = True)
 
-	def render(self):
+	def render(self, template_values):
 		self._render_text = self.content.replace('\n', '<br>')
 		#template_values = {
 		#		'user': self.getName(),
 		#		'alert': self.getAlert(),
 		#		'p': self
 		#}
-		#template = JINJA_ENVIRONMENT.get_template('post.html')
+		template = JINJA_ENVIRONMENT.get_template('post.html')
 		#self.response.write(template.render(template_values))
-		return render_str("post.html", author = self.author, p = self)
+		return template.render(template_values)
+		#return render_str("post.html", template_values)
 
 class MainPage(Handler):
 	def get(self):
@@ -125,15 +128,16 @@ class Timeline(Handler):
 class PostPage(Handler):
 	def get(self, post_id):
 		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+		post = db.get(key)
 		# So weird \/
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
-				'post': db.get(key)
+				'p': post
 		}
-		template = JINJA_ENVIRONMENT.get_template('permalink.html')
-		self.response.write(template.render(template_values))
-		#self.render("permalink.html", post = post)
+		#template = JINJA_ENVIRONMENT.get_template('permalink.html')
+		#self.response.write(template.render(template_values))
+		self.render("permalink.html", post = post, template_values = template_values)
 
 class NewPost(Handler):
 	def get(self):
