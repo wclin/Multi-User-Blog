@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="container">
+
+    <div class="blog-header">
+        <h1 class="blog-title">The {{user}} blog</h1>
+        <p class="lead blog-description">The official example template of creating a blog with Bootstrap.</p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-8 blog-main">
+            <div class="post">
+                <div class="post-heading">
+                  <div class="post-title">
+
+                  </div>
+
+                  <div class="post-date">
+                    {{p.created.strftime("%b %d, %Y")}}
+                  </div>
+                </div>
+
+                <div class="post-content">
+                  {{p._render_text | safe}}
+                </div>
+            </div>
+            <body>
+                <h1>Edit Post</h1>
+
+                <form method="post">
+                    <label>
+                        <div>title</div>
+                        <input type="text" name="title" value="{{p.title}}">
+                    </label>
+
+                    <label>
+                        <div>content</div>
+                        <textarea name="content">{{p.content}}</textarea>
+                    </label>
+
+                    <input type="submit">
+                </form>
+            </body>
+        </div><!-- /.blog-main -->
+    </div><!-- /.row -->
+
+    </div><!-- /.container -->
+    {% endblock %}

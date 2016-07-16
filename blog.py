@@ -133,11 +133,37 @@ class PostPage(Handler):
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
-				'p': post
+				'p': post,
+				'post_id': post_id
 		}
 		#template = JINJA_ENVIRONMENT.get_template('permalink.html')
 		#self.response.write(template.render(template_values))
 		self.render("permalink.html", post = post, template_values = template_values)
+
+class EditPost(Handler):
+	def get(self):
+		post_id = self.request.get("post_id")
+		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+		post = db.get(key)
+		template_values = {
+				'user': self.getName(),
+				'alert': self.getAlert(),
+				'p': post,
+				'post_id': post_id,
+		}
+		template = JINJA_ENVIRONMENT.get_template('editpost.html')
+		self.response.write(template.render(template_values))
+		#self.render("editpost.html", template_values)
+	
+	def post(self):
+		post_id = self.request.get("post_id")
+		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+		p = db.get(key)
+		p.title = self.request.get("title")
+		p.content = self.request.get("content")
+		p.put()
+		self.redirect("/%s" % str(p.key().id()))
+		
 
 class NewPost(Handler):
 	def get(self):
@@ -238,5 +264,13 @@ class Welcome(Handler):
 
 
 app = webapp2.WSGIApplication([
-	('/', MainPage), ('/Timeline', Timeline), ('/Welcome', Welcome), ('/NewPost', NewPost), ('/SignUp', SignUp), ('/Login', Login), ('/Logout', Logout), ('/([0-9]+)', PostPage)
+	('/', MainPage), 
+	('/Timeline', Timeline), 
+	('/Welcome', Welcome), 
+	('/NewPost', NewPost), 
+	('/EditPost', EditPost), 
+	('/SignUp', SignUp), 
+	('/Login', Login), 
+	('/Logout', Logout), 
+	('/([0-9]+)', PostPage)
 ], debug=True)
