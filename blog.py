@@ -15,8 +15,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
 
-#ALERT = Queue.Queue()
-
 def make_pw_hash(name, pwd):
 	return bcrypt.hashpw(name+pwd+SECRET, bcrypt.gensalt())
 
@@ -87,50 +85,53 @@ class Post(db.Model):
 
 	def render(self):
 		self._render_text = self.content.replace('\n', '<br>')
-		template_values = {
-				'user': self.getName(),
-				'alert': self.getAlert(),
-		}
-		template = JINJA_ENVIRONMENT.get_template('login.html')
-		self.response.write(template.render(template_values))
-		#return render_str("post.html", author = self.author, p = self)
+		#template_values = {
+		#		'user': self.getName(),
+		#		'alert': self.getAlert(),
+		#		'p': self
+		#}
+		#template = JINJA_ENVIRONMENT.get_template('post.html')
+		#self.response.write(template.render(template_values))
+		return render_str("post.html", author = self.author, p = self)
 
 class MainPage(Handler):
 	def get(self):
 		author = self.getUser()
 		if author:
-			posts = Post.all().filter('author =', author).order('-created')
 			template_values = {
 					'user': self.getName(),
 					'alert': self.getAlert(),
+					'posts': Post.all().filter('author =', author).order('-created')
 			}
-			template = JINJA_ENVIRONMENT.get_template('login.html')
+			template = JINJA_ENVIRONMENT.get_template('index.html')
 			self.response.write(template.render(template_values))
 			#self.render("index.html", author = self.getName(), posts = posts)
 		else:
-			self.redirect("/Login")
+			alert = dict(category="alert-warning", message="Login le ma?")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			#self.redirect("/Login")
 
 class Timeline(Handler):
 	def get(self):
-		posts = Post.all().order('-created')
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
+				'posts': Post.all().order('-created')
 		}
-		template = JINJA_ENVIRONMENT.get_template('login.html')
+		template = JINJA_ENVIRONMENT.get_template('timeline.html')
 		self.response.write(template.render(template_values))
 		#self.render("timeline.html", author = self.getName(), posts = posts)
 
 class PostPage(Handler):
 	def get(self, post_id):
 		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
-		post = db.get(key)
 		# So weird \/
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
+				'post': db.get(key)
 		}
-		template = JINJA_ENVIRONMENT.get_template('login.html')
+		template = JINJA_ENVIRONMENT.get_template('permalink.html')
 		self.response.write(template.render(template_values))
 		#self.render("permalink.html", post = post)
 
@@ -141,12 +142,14 @@ class NewPost(Handler):
 					'user': self.getName(),
 					'alert': self.getAlert(),
 			}
-			template = JINJA_ENVIRONMENT.get_template('login.html')
+			template = JINJA_ENVIRONMENT.get_template('newpost.html')
 			self.response.write(template.render(template_values))
 			#self.render("newpost.html", author = self.getName())
 		else:
 			#self.write("Login first yo")
-			self.redirect("/Login")
+			alert = dict(category="alert-warning", message="Login first yo")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			#self.redirect("/Login")
 
 	def post(self):
 		author = self.getUser()
@@ -155,9 +158,13 @@ class NewPost(Handler):
 		if author:
 			p = Post(parent = blog_key(), author = author, title = title, content = content)
 			p.put()
+			alert = dict(category="alert-success", message="Here~")
+			#self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 			self.redirect("/%s" % str(p.key().id()))
 		else:
-			self.write("No valid yo")
+			alert = dict(category="alert-error", message="Please login first!")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			#self.write("No valid yo")
 
 class SignUp(Handler):
 	def get(self):
@@ -177,7 +184,9 @@ class SignUp(Handler):
 		pwdh = make_pw_hash(name, pwd)
 		a = Author.get_by_key_name(name)
 		if a:
-			self.write("Already been used lwo")
+			alert = dict(category="alert-error", message="Duplicate!")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			#self.write("Already been used lwo")
 		else :
 			a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
 			a.put()
@@ -202,20 +211,26 @@ class Login(Handler):
 			self.setName(u)
 			self.redirect("/Welcome")
 		else:
-			alert = dict(category="alert-warning", message="No~")
+			alert = dict(category="alert-warning", message="Try again~")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
 
 class Logout(Handler):
 	def get(self):
 		self.setName()
-		self.redirect("/Login")
+		alert = dict(category="alert-success", message="Bye~")
+		self.redirect("/Login?%s" % urllib.urlencode(alert))
+		#self.redirect("/Login")
 
 class Welcome(Handler):
 	def get(self):
 		if self.getName():
-			self.redirect("/")
+			alert = dict(category="alert-success", message="Welcome!")
+			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+			#self.redirect("/")
 		else: 
-			self.write("Nooooo")
+			alert = dict(category="alert-error", message="Nooooo")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			#self.write("Nooooo")
 
 
 app = webapp2.WSGIApplication([
