@@ -1,4 +1,4 @@
-{% extends "index.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
@@ -17,6 +17,10 @@
             {{p.title}}
           </div>
 
+          <div class="post-title">
+            {{p.author.name}}
+          </div>
+
           <div class="post-date">
             {{p.created.strftime("%b %d, %Y")}}
           </div>
@@ -24,7 +28,10 @@
 
         <div class="post-content">
           {{p._render_text | safe}}
+          {{p.content}}
         </div>
+
+        <a class="pager" href="/EditPost?post_id={{p.key().id()}}">Edit</a>
       </div>
 
       <nav>

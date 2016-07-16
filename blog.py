@@ -4,7 +4,7 @@ import jinja2
 import webapp2
 import urllib
 from libs.bcrypt import bcrypt
-import Queue
+import logging as log
 
 from google.appengine.ext import db
 
@@ -141,24 +141,33 @@ class PostPage(Handler):
 		self.render("permalink.html", post = post, template_values = template_values)
 
 class EditPost(Handler):
-	def get(self):
+	def getPost(self):
 		post_id = self.request.get("post_id")
 		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
-		post = db.get(key)
+		return db.get(key)
+
+	def unEditable(self, p):
+		alert = dict(category="alert-danger", message="It's not your post!")
+		self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
+
+	def get(self):
+		p = self.getPost()
+		if self.getName() != p.author.name:
+			self.unEditable(p)
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
-				'p': post,
-				'post_id': post_id,
+				'p': p,
+				'post_id': self.request.get("post_id"),
 		}
 		template = JINJA_ENVIRONMENT.get_template('editpost.html')
 		self.response.write(template.render(template_values))
 		#self.render("editpost.html", template_values)
 	
 	def post(self):
-		post_id = self.request.get("post_id")
-		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
-		p = db.get(key)
+		p = self.getPost()
+		if self.getName() != p.author.name:
+			self.unEditable(p)
 		p.title = self.request.get("title")
 		p.content = self.request.get("content")
 		p.put()
@@ -192,7 +201,7 @@ class NewPost(Handler):
 			#self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 			self.redirect("/%s" % str(p.key().id()))
 		else:
-			alert = dict(category="alert-error", message="Please login first!")
+			alert = dict(category="alert-danger", message="Please login first!")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
 			#self.write("No valid yo")
 
@@ -214,7 +223,7 @@ class SignUp(Handler):
 		pwdh = make_pw_hash(name, pwd)
 		a = Author.get_by_key_name(name)
 		if a:
-			alert = dict(category="alert-error", message="Duplicate!")
+			alert = dict(category="alert-danger", message="Duplicate!")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
 			#self.write("Already been used lwo")
 		else :
@@ -258,7 +267,7 @@ class Welcome(Handler):
 			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 			#self.redirect("/")
 		else: 
-			alert = dict(category="alert-error", message="Nooooo")
+			alert = dict(category="alert-danger", message="Nooooo")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
 			#self.write("Nooooo")
 
