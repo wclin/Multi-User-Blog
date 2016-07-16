@@ -72,6 +72,16 @@ class Handler(webapp2.RequestHandler):
 		message = self.request.get('message')
 		category = self.request.get('category')
 		return Alert.set(category, message)
+	
+	def getPost(self):
+		post_id = self.request.get("post_id")
+		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
+		return db.get(key)
+
+	def unEditable(self, p):
+		alert = dict(category="alert-danger", message="It's not your post!")
+		self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
+
 
 class Author(db.Model):
 	name = db.StringProperty(required = True)
@@ -140,20 +150,22 @@ class PostPage(Handler):
 		#self.response.write(template.render(template_values))
 		self.render("permalink.html", post = post, template_values = template_values)
 
-class EditPost(Handler):
-	def getPost(self):
-		post_id = self.request.get("post_id")
-		key = db.Key.from_path("Post", int(post_id), parent=blog_key())
-		return db.get(key)
-
-	def unEditable(self, p):
-		alert = dict(category="alert-danger", message="It's not your post!")
-		self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
-
+class DeletePost(Handler):
 	def get(self):
 		p = self.getPost()
 		if self.getName() != p.author.name:
 			self.unEditable(p)
+			return
+		p.delete()
+		alert = dict(category="alert-success", message="Deleted!!")
+		self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+
+class EditPost(Handler):
+	def get(self):
+		p = self.getPost()
+		if self.getName() != p.author.name:
+			self.unEditable(p)
+			return
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
@@ -168,6 +180,7 @@ class EditPost(Handler):
 		p = self.getPost()
 		if self.getName() != p.author.name:
 			self.unEditable(p)
+			return
 		p.title = self.request.get("title")
 		p.content = self.request.get("content")
 		p.put()
@@ -278,6 +291,7 @@ app = webapp2.WSGIApplication([
 	('/Welcome', Welcome), 
 	('/NewPost', NewPost), 
 	('/EditPost', EditPost), 
+	('/DeletePost', DeletePost), 
 	('/SignUp', SignUp), 
 	('/Login', Login), 
 	('/Logout', Logout), 
