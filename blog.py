@@ -27,19 +27,6 @@ def valid_pw(name, pwd, hashed):
 def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
 
-class Alert():
-	"""
-	A simple class represent bootstrap alert.
-	
-
-	catergory: ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
-	"""
-	@classmethod # Or maybe __init__ is fine
-	def set(cls, category, message):
-		a = cls()
-		a.category = category
-		a.message = message
-		return a
 
 class Alert():
     """A simple class represent bootstrap alert.
@@ -174,6 +161,13 @@ class Handler(webapp2.RequestHandler):
         alert = dict(category="alert-danger", message="It's not your post!")
         self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 
+    def loginFirst(self):
+        """
+        Redirect to the Login page, with alert message.
+        """
+        alert = dict(category="alert-warning",message="Login before action!")
+        self.redirect("/Login?%s" % urllib.urlencode(alert))
+        
     def isLiked(self, p):
         """
         Return if the given post is liked by this user before.
@@ -201,8 +195,7 @@ class MainPage(Handler):
             self.response.write(template.render(template_values))
             # self.render("index.html", template_values) can't work
         else:
-            alert = dict(category="alert-warning", message="Login le ma?")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+            self.redirect("/Login")
 
 
 class Timeline(Handler):
@@ -232,7 +225,6 @@ class Like(Handler):
             self.redirect("/Timeline?%s" % urllib.urlencode(alert))
             return
         u = self.getUser()
-        log.info("u = %s" % u)
         if not u:
             alert = dict(
                 category="alert-warning",
@@ -292,6 +284,9 @@ class DeletePost(Handler):
 
     def get(self):
         p = self.getPost()
+        if not self.getUser():
+            self.loginFirst()
+            return
         if self.getName() != p.author.name:
             self.unEditable(p)
             return
@@ -304,6 +299,9 @@ class EditPost(Handler):
 
     def get(self):
         p = self.getPost()
+        if not self.getUser():
+            self.loginFirst()
+            return
         if self.getName() != p.author.name:
             self.unEditable(p)
             return
