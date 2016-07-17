@@ -23,7 +23,8 @@ h6, .h6 {
   font-weight: normal;
   color: #333;
 }
-input[type=text] {
+input[type=text],
+input[type=password] {
     width: 100%;
     padding: 12px 20px;
     box-sizing: border-box;
