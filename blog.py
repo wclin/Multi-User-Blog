@@ -27,17 +27,6 @@ def valid_pw(name, pwd, hashed):
 def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
 
-<<<<<<< HEAD
-||||||| merged common ancestors
-class Alert(): # Or maybe __init__ is fine
-	# ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
-	@classmethod
-	def set(cls, category, message):
-		a = cls()
-		a.category = category
-		a.message = message
-		return a
-=======
 class Alert():
 	"""
 	A simple class represent bootstrap alert.
@@ -51,7 +40,6 @@ class Alert():
 		a.category = category
 		a.message = message
 		return a
->>>>>>> 18ce0fc49f19aafef36e33893143887a7e4d698e
 
 class Alert():
     """A simple class represent bootstrap alert.
@@ -87,7 +75,6 @@ class Author(db.Model):
 
 
 class Post(db.Model):
-<<<<<<< HEAD
     """A simple post entity.
 
     Attributes:
@@ -110,39 +97,6 @@ class Post(db.Model):
         template = JINJA_ENVIRONMENT.get_template('post.html')
         return template.render(template_values)
 
-||||||| merged common ancestors
-	author = db.ReferenceProperty(Author)
-	title = db.StringProperty()
-	content = db.TextProperty()
-	created = db.DateTimeProperty(auto_now_add = True)
-	likes = db.IntegerProperty(default=0)
-	isLiked = db.BooleanProperty()
-
-	def render(self, template_values):
-		self._render_text = self.content.replace('\n', '<br>')
-		template = JINJA_ENVIRONMENT.get_template('post.html')
-		return template.render(template_values)
-		#return render_str("post.html", template_values)
-=======
-	author = db.ReferenceProperty(Author)
-	title = db.StringProperty()
-	content = db.TextProperty()
-	created = db.DateTimeProperty(auto_now_add = True)
-	likes = db.IntegerProperty(default=0)
-	isLiked = db.BooleanProperty()
-
-	def render(self, template_values):
-		self._render_text = self.content.replace('\n', '<br>')
-		#template_values = {
-		#		'user': self.getName(),
-		#		'alert': self.getAlert(),
-		#		'p': self
-		#}
-		template = JINJA_ENVIRONMENT.get_template('post.html')
-		#self.response.write(template.render(template_values))
-		return template.render(template_values)
-		#return render_str("post.html", template_values)
->>>>>>> 18ce0fc49f19aafef36e33893143887a7e4d698e
 
 class Likes(db.Model):
     """An entity in order to represent the many-to-many relation about the preference of users about posts. The existence of the instance(user:u, post:p), indicate u like p.
@@ -409,7 +363,6 @@ class NewPost(Handler):
 
 
 class SignUp(Handler):
-<<<<<<< HEAD
 
     def get(self):
         template_values = {
@@ -459,74 +412,6 @@ class SignUp(Handler):
             a.put()
             self.setName(a)
             self.redirect("/Welcome")
-
-||||||| merged common ancestors
-	def get(self):
-		template_values = {
-				'user': self.getName(),
-				'alert': self.getAlert(),
-				'username': self.username,
-				'email': self.email,
-				'description': self.description
-		}
-		log.info("username: %s, email: %s, description: %s" % (self.username, self.email, self.description))
-		template = JINJA_ENVIRONMENT.get_template('signup.html')
-		self.response.write(template.render(template_values))
-		#self.render("signup.html", author = self.getName())
-
-	def post(self):
-		name = self.request.get("username")
-		# Password verify twice
-		pwd = self.request.get("password")
-		verify = self.request.get("verify")
-		email = self.request.get("email")
-		dscr = self.request.get("description")
-		pwdh = make_pw_hash(name, pwd)
-		a = Author.get_by_key_name(name)
-		if not pwd or pwd != verify:
-			alert = dict(category="alert-danger", message="Verification failed!")
-			self.render("signup.html", user = self.getName(), alert = alert, username = name, email = email, description = dscr)
-			#self.redirect("/SignUp?%s" % urllib.urlencode(alert))
-			return
-		if a:
-			alert = dict(category="alert-danger", message="Duplicate!")
-			self.render("signup.html", user = self.getName(), alert = alert, username = name, email = email, description = dscr)
-			#self.redirect("/SignUp?%s" % urllib.urlencode(alert))
-			return
-			#self.write("Already been used lwo")
-		else :
-			a = Author(key_name = name, name = name, pwdh = pwdh, email = email, dscr = dscr)
-			a.put()
-			self.setName(a)
-			self.redirect("/Welcome")
-=======
-	def get(self):
-		template_values = {
-				'user': self.getName(),
-				'alert': self.getAlert(),
-		}
-		template = JINJA_ENVIRONMENT.get_template('signup.html')
-		self.response.write(template.render(template_values))
-		#self.render("signup.html", author = self.getName())
-
-	def post(self):
-		name = self.request.get("username")
-		# Password verify twice
-		pwd = self.request.get("password")
-		email = self.request.get("email")
-		dscr = self.request.get("description")
-		pwdh = make_pw_hash(name, pwd)
-		a = Author.get_by_key_name(name)
-		if a:
-			alert = dict(category="alert-danger", message="Duplicate!")
-			self.redirect("/Login?%s" % urllib.urlencode(alert))
-			#self.write("Already been used lwo")
-		else :
-			a = Author(key_name = name, name = name, pwdh = pwdh, email = email, dscr = dscr)
-			a.put()
-			self.setName(a)
-			self.redirect("/Welcome")
->>>>>>> 18ce0fc49f19aafef36e33893143887a7e4d698e
 
 class Login(Handler):
 
