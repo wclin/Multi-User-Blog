@@ -156,7 +156,12 @@ class Like(Handler):
 			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 			return
 		u = self.getUser()
-		if u.name == p.author.name:
+		log.info("u = %s" % u)
+		if not u:
+			alert = dict(category="alert-warning", message="Login before like!")
+			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			return
+		if u and u.name == p.author.name:
 			alert = dict(category="alert-danger", message="You self-lover!")
 			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 			return
