@@ -195,7 +195,7 @@ class MainPage(Handler):
             self.response.write(template.render(template_values))
             # self.render("index.html", template_values) can't work
         else:
-            self.redirect("/Login")
+            self.loginFirst()
 
 
 class Timeline(Handler):
@@ -219,17 +219,14 @@ class Timeline(Handler):
 class Like(Handler):
 
     def get(self):
+        u = self.getUser()
+        if not u:
+            self.loginFirst()
+            return
         p = self.getPost()
         if self.isLiked(p):
             alert = dict(category="alert-danger", message="Already liked!!")
             self.redirect("/Timeline?%s" % urllib.urlencode(alert))
-            return
-        u = self.getUser()
-        if not u:
-            alert = dict(
-                category="alert-warning",
-                message="Login before like!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
             return
         if u and u.name == p.author.name:
             alert = dict(category="alert-danger", message="You self-lover!")
@@ -298,10 +295,10 @@ class DeletePost(Handler):
 class EditPost(Handler):
 
     def get(self):
-        p = self.getPost()
         if not self.getUser():
             self.loginFirst()
             return
+        p = self.getPost()
         if self.getName() != p.author.name:
             self.unEditable(p)
             return
@@ -315,6 +312,9 @@ class EditPost(Handler):
         self.response.write(template.render(template_values))
 
     def post(self):
+        if not self.getUser():
+            self.loginFirst()
+            return
         p = self.getPost()
         if self.getName() != p.author.name:
             self.unEditable(p)
@@ -328,36 +328,32 @@ class EditPost(Handler):
 class NewPost(Handler):
 
     def get(self):
-        if self.getUser():
-            template_values = {
-                'user': self.getName(),
-                'alert': self.getAlert(),
-            }
-            template = JINJA_ENVIRONMENT.get_template('newpost.html')
-            self.response.write(template.render(template_values))
-        else:
-            alert = dict(category="alert-warning", message="Login first yo")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+        if not self.getUser():
+            self.loginFirst()
+            return
+        template_values = {
+            'user': self.getName(),
+            'alert': self.getAlert(),
+        }
+        template = JINJA_ENVIRONMENT.get_template('newpost.html')
+        self.response.write(template.render(template_values))
 
     def post(self):
         author = self.getUser()
         title = self.request.get("title")
         content = self.request.get("content")
-        if author:
-            p = Post(
-                parent=blog_key(),
-                author=author,
-                title=title,
-                content=content)
-            p.put()
-            alert = dict(category="alert-success", message="Here~")
-            self.redirect("/%s?%s" %
-                          (str(p.key().id()), urllib.urlencode(alert)))
-        else:
-            alert = dict(
-                category="alert-danger",
-                message="Please login first!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+        if not author:
+            self.loginFirst()
+            return
+        p = Post(
+            parent=blog_key(),
+            author=author,
+            title=title,
+            content=content)
+        p.put()
+        alert = dict(category="alert-success", message="Here~")
+        self.redirect("/%s?%s" %
+                      (str(p.key().id()), urllib.urlencode(alert)))
 
 
 class SignUp(Handler):
@@ -436,6 +432,9 @@ class Login(Handler):
 class Logout(Handler):
 
     def get(self):
+        if not self.getUser():
+            self.loginFirst()
+            return
         self.setName()
         alert = dict(category="alert-success", message="Bye~")
         self.redirect("/Login?%s" % urllib.urlencode(alert))
