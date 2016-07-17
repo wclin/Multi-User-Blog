@@ -103,13 +103,7 @@ class Post(db.Model):
 
 	def render(self, template_values):
 		self._render_text = self.content.replace('\n', '<br>')
-		#template_values = {
-		#		'user': self.getName(),
-		#		'alert': self.getAlert(),
-		#		'p': self
-		#}
 		template = JINJA_ENVIRONMENT.get_template('post.html')
-		#self.response.write(template.render(template_values))
 		return template.render(template_values)
 		#return render_str("post.html", template_values)
 
@@ -276,7 +270,11 @@ class SignUp(Handler):
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
+				'username': self.username,
+				'email': self.email,
+				'description': self.description
 		}
+		log.info("username: %s, email: %s, description: %s" % (self.username, self.email, self.description))
 		template = JINJA_ENVIRONMENT.get_template('signup.html')
 		self.response.write(template.render(template_values))
 		#self.render("signup.html", author = self.getName())
@@ -285,13 +283,21 @@ class SignUp(Handler):
 		name = self.request.get("username")
 		# Password verify twice
 		pwd = self.request.get("password")
+		verify = self.request.get("verify")
 		email = self.request.get("email")
 		dscr = self.request.get("description")
 		pwdh = make_pw_hash(name, pwd)
 		a = Author.get_by_key_name(name)
+		if not pwd or pwd != verify:
+			alert = dict(category="alert-danger", message="Verification failed!")
+			self.render("signup.html", user = self.getName(), alert = alert, username = name, email = email, description = dscr)
+			#self.redirect("/SignUp?%s" % urllib.urlencode(alert))
+			return
 		if a:
 			alert = dict(category="alert-danger", message="Duplicate!")
-			self.redirect("/Login?%s" % urllib.urlencode(alert))
+			self.render("signup.html", user = self.getName(), alert = alert, username = name, email = email, description = dscr)
+			#self.redirect("/SignUp?%s" % urllib.urlencode(alert))
+			return
 			#self.write("Already been used lwo")
 		else :
 			a = Author(key_name = name, name = name, pwdh = pwdh, email = email, dscr = dscr)
