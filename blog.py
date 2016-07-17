@@ -24,18 +24,40 @@ def valid_pw(name, pwd, hashed):
 def blog_key(name = 'default'):
 	return db.Key.from_path('blogs', name)
 
-def render_str(template, **params): # used by permalink post.render()
-	t = JINJA_ENVIRONMENT.get_template(template)
-	return t.render(params)
-
-class Alert(): # Or maybe __init__ is fine
-	# ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
-	@classmethod
+class Alert():
+	"""A simple class represent bootstrap alert.
+	
+	Attributes:
+		category (str): corresponding to 4 bootstrap alert class:
+			['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
+		message (str): The string shows on alert.
+	
+	"""
+	@classmethod  #Or maybe __init__ is fine
 	def set(cls, category, message):
 		a = cls()
 		a.category = category
 		a.message = message
 		return a
+
+class Author(db.Model):
+	name = db.StringProperty(required = True)
+	pwdh = db.StringProperty(required = True)
+	eamil = db.StringProperty()
+	dscr = db.TextProperty() 
+
+class Post(db.Model):
+	author = db.ReferenceProperty(Author)
+	title = db.StringProperty()
+	content = db.TextProperty()
+	created = db.DateTimeProperty(auto_now_add = True)
+	likes = db.IntegerProperty(default=0)
+	isLiked = db.BooleanProperty()
+
+	def render(self, template_values):
+		self._render_text = self.content.replace('\n', '<br>')
+		template = JINJA_ENVIRONMENT.get_template('post.html')
+		return template.render(template_values)
 
 class Handler(webapp2.RequestHandler):
 	def __init__(self, request, response):
@@ -85,27 +107,6 @@ class Handler(webapp2.RequestHandler):
 	def isLiked(self, p):
 		u = self.getUser()
 		return Likes.all().filter('user =', u).filter('post =', p).get()
-
-
-class Author(db.Model):
-	name = db.StringProperty(required = True)
-	pwdh = db.StringProperty(required = True)
-	eamil = db.StringProperty()
-	dscr = db.TextProperty() 
-
-class Post(db.Model):
-	author = db.ReferenceProperty(Author)
-	title = db.StringProperty()
-	content = db.TextProperty()
-	created = db.DateTimeProperty(auto_now_add = True)
-	likes = db.IntegerProperty(default=0)
-	isLiked = db.BooleanProperty()
-
-	def render(self, template_values):
-		self._render_text = self.content.replace('\n', '<br>')
-		template = JINJA_ENVIRONMENT.get_template('post.html')
-		return template.render(template_values)
-		#return render_str("post.html", template_values)
 
 class Likes(db.Model):
 	user = db.ReferenceProperty(Author)
@@ -231,7 +232,6 @@ class EditPost(Handler):
 		p.content = self.request.get("content")
 		p.put()
 		self.redirect("/%s" % str(p.key().id()))
-		
 
 class NewPost(Handler):
 	def get(self):
@@ -259,7 +259,6 @@ class NewPost(Handler):
 		else:
 			alert = dict(category="alert-danger", message="Please login first!")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
-
 
 class SignUp(Handler):
 	def get(self):
