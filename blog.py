@@ -244,10 +244,8 @@ class NewPost(Handler):
 			self.response.write(template.render(template_values))
 			#self.render("newpost.html", author = self.getName())
 		else:
-			#self.write("Login first yo")
 			alert = dict(category="alert-warning", message="Login first yo")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
-			#self.redirect("/Login")
 
 	def post(self):
 		author = self.getUser()
@@ -257,12 +255,10 @@ class NewPost(Handler):
 			p = Post(parent = blog_key(), author = author, title = title, content = content)
 			p.put()
 			alert = dict(category="alert-success", message="Here~")
-			#self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
-			self.redirect("/%s" % str(p.key().id()))
+			self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 		else:
 			alert = dict(category="alert-danger", message="Please login first!")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
-			#self.write("No valid yo")
 
 
 class SignUp(Handler):
@@ -270,18 +266,13 @@ class SignUp(Handler):
 		template_values = {
 				'user': self.getName(),
 				'alert': self.getAlert(),
-				'username': self.username,
-				'email': self.email,
-				'description': self.description
 		}
-		log.info("username: %s, email: %s, description: %s" % (self.username, self.email, self.description))
 		template = JINJA_ENVIRONMENT.get_template('signup.html')
 		self.response.write(template.render(template_values))
 		#self.render("signup.html", author = self.getName())
 
 	def post(self):
 		name = self.request.get("username")
-		# Password verify twice
 		pwd = self.request.get("password")
 		verify = self.request.get("verify")
 		email = self.request.get("email")
@@ -298,7 +289,6 @@ class SignUp(Handler):
 			self.render("signup.html", user = self.getName(), alert = alert, username = name, email = email, description = dscr)
 			#self.redirect("/SignUp?%s" % urllib.urlencode(alert))
 			return
-			#self.write("Already been used lwo")
 		else :
 			a = Author(key_name = name, name = name, pwdh = pwdh, email = email, dscr = dscr)
 			a.put()
@@ -331,18 +321,15 @@ class Logout(Handler):
 		self.setName()
 		alert = dict(category="alert-success", message="Bye~")
 		self.redirect("/Login?%s" % urllib.urlencode(alert))
-		#self.redirect("/Login")
 
 class Welcome(Handler):
 	def get(self):
 		if self.getName():
 			alert = dict(category="alert-success", message="Welcome!")
 			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
-			#self.redirect("/")
 		else: 
 			alert = dict(category="alert-danger", message="Nooooo")
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
-			#self.write("Nooooo")
 
 
 app = webapp2.WSGIApplication([
