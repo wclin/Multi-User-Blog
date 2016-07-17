@@ -1,41 +1,30 @@
 {% extends "base.html" %}
 
+{% block header %}
+      <div class="blog-header">
+        <h1 class="blog-title">{{p.title}}</h1>
+        <p class="lead blog-description">
+          by {{p.author.name}} at {{p.created.strftime("%b %d, %Y")}}</p>
+      </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="row">
 
     <div class="col-sm-8 blog-main">
       <div class="post">
-        <div class="post-heading">
-          <div class="post-title">
-            {{p.title}}
-          </div>
-
-          <div class="post-title">
-            {{p.author.name}}
-          </div>
-
-          <div class="post-title">
-            {{p.likes}}
-          </div>
-
-          <div class="post-date">
-            {{p.created.strftime("%b %d, %Y")}}
-          </div>
-        </div>
 
         <div class="post-content">
           {{p._render_text | safe}}
         </div>
 
-        <a class="pager" href="/EditPost?post_id={{p.key().id()}}">Edit</a>
-        <a class="pager" href="/DeletePost?post_id={{p.key().id()}}">Delete</a>
       </div>
 
       <nav>
         <ul class="pager">
-            <li><a href="#">Previous</a></li>
-            <li><a href="#">Next</a></li>
+            <li><a href="/EditPost?post_id={{p.key().id()}}">Edit</a></li>
+            <li><a href="/DeletePost?post_id={{p.key().id()}}">Delete</a></li>
         </ul>
       </nav>
     </div><!-- /.blog-main -->

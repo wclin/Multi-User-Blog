@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
 
-    <title>The Blog</title>
+    <title>Multi User Blog</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/css/bootstrap.css" rel="stylesheet">
@@ -52,11 +52,15 @@
       </div>
     {% endif %}
 
+
     <div class="container">
+
+      {% block header %}
       <div class="blog-header">
-        <h1 class="blog-title">The {{user}} blog</h1>
-        <p class="lead blog-description">The official example template of creating a blog with Bootstrap.</p>
+        <h1 class="blog-title">{{user}} Blog</h1>
+        <p class="lead blog-description">Hey {{user}}! Here's your blog.</p>
       </div>
+      {% endblock %}
 
     {% block content %}
     {% endblock %}
