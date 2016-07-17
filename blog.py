@@ -155,7 +155,12 @@ class Like(Handler):
 			alert = dict(category="alert-danger", message="Already liked!!")
 			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 			return
-		l = Likes(user = self.getUser(), post = p)
+		u = self.getUser()
+		if u.name == p.author.name:
+			alert = dict(category="alert-danger", message="You self-lover!")
+			self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+			return
+		l = Likes(user = u, post = p)
 		l.put()
 		p.likes = p.likes + 1
 		p.put()
