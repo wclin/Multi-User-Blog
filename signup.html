@@ -2,76 +2,60 @@
 
 {% set active_page = 'signup' %}
 
+{% block header %}
+      <div class="blog-header">
+        <h1 class="blog-title">SignUp</h1>
+        <p class="lead blog-description">Already have one? <a href="/Login">Login</a></p>
+      </div>
+{% endblock %}
+
 {% block content %}
 
     <div class="row">
 
-        <div class="col-sm-8 blog-main">
-
+        <div class="col-sm-12 blog-main">
           <body>
-            <h2>Signup</h2>
-            <a href="/Login">Login</a>
             <form method="post">
-              <table>
-                <label>
-                  <td class="label">
-                    Username
-                  </td>
-                  <td>
-                    <input type="text" name="username" value="{{username}}">
-                  </td>
-                  <td class="error">
-                    {{error_username}}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="label">
-                    Password
-                  </td>
-                  <td>
-                    <input type="password" name="password" value="">
-                  </td>
-                  <td class="error">
-                    {{error_password}}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="label">
-                    Verify Password
-                  </td>
-                  <td>
-                    <input type="password" name="verify" value="">
-                  </td>
-                  <td class="error">
-                    {{error_verify}}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="label">
-                    Email (optional)
-                  </td>
-                  <td>
-                    <input type="text" name="email" value="{{email}}">
-                  </td>
-                  <td class="error">
-                    {{error_email}}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="label">
-                    Description (optional)
-                  </td>
-                  <td>
-                    <textarea name="description"></textarea>
-                  </td>
-                  </label>
-                </tr>
-              </table>
-
+                <div class="row">
+                  <div class="col-sm-12">
+                    <label>
+                      Username
+                      <input type="text" name="username" value="{{username}}">
+                    </lebel>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <label>
+                      Password
+                      <input type="password" name="password" value="">
+                    </lebel>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <label>
+                      Verify Password
+                      <input type="password" name="verify" value="">
+                    </lebel>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <label>
+                      Email (optional)
+                      <input type="text" name="email" value="{{email}}">
+                    </lebel>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <label>
+                      Description (optional)
+                      <textarea name="description">{{description}}</textarea>
+                    </lebel>
+                  </div>
+                </div>
               <input type="submit">
             </form>
           </body>

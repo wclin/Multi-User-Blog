@@ -2,6 +2,13 @@
 
 {% set active_page = 'login' %}
 
+{% block header %}
+      <div class="blog-header">
+        <h1 class="blog-title">Login</h1>
+        <p class="lead blog-description">Didn't have one? <a href="/SignUp">SignUp</a></p>
+      </div>
+{% endblock %}
+
 {% block content %}
 
     <div class="row">
@@ -9,8 +16,6 @@
         <div class="col-sm-8 blog-main">
 
           <body>
-            <h2>Login</h2>
-            <a href="/SignUp">SignUp</a>
             <form method="post">
               <table>
                 <label>
