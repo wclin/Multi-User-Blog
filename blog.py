@@ -91,7 +91,7 @@ class Author(db.Model):
 	name = db.StringProperty(required = True)
 	pwdh = db.StringProperty(required = True)
 	eamil = db.StringProperty()
-	dscr = db.StringProperty() 
+	dscr = db.TextProperty() 
 
 class Post(db.Model):
 	author = db.ReferenceProperty(Author)
@@ -122,6 +122,7 @@ class MainPage(Handler):
 		author = self.getUser()
 		if author:
 			template_values = {
+					'author': author,
 					'user': self.getName(),
 					'alert': self.getAlert(),
 					'posts': Post.all().filter('author =', author).order('-created')
@@ -285,6 +286,7 @@ class SignUp(Handler):
 		# Password verify twice
 		pwd = self.request.get("password")
 		email = self.request.get("email")
+		dscr = self.request.get("description")
 		pwdh = make_pw_hash(name, pwd)
 		a = Author.get_by_key_name(name)
 		if a:
@@ -292,7 +294,7 @@ class SignUp(Handler):
 			self.redirect("/Login?%s" % urllib.urlencode(alert))
 			#self.write("Already been used lwo")
 		else :
-			a = Author(key_name = name, name = name, pwdh = pwdh, email = email)
+			a = Author(key_name = name, name = name, pwdh = pwdh, email = email, dscr = dscr)
 			a.put()
 			self.setName(a)
 			self.redirect("/Welcome")
