@@ -2,25 +2,35 @@
 
 {% set active_page = 'newpost' %}
 
+{% block header %}
+      <div class="blog-header">
+        <h1 class="blog-title">New Post</h1>
+      </div>
+{% endblock %}
+
 {% block content %}
 
     <div class="row">
 
         <div class="col-sm-8 blog-main">
             <body>
-                <h1>New Post</h1>
-
                 <form method="post">
-                    <label>
-                        <div>title</div>
-                        <input type="text" name="title">
-                    </label>
-
-                    <label>
-                        <div>content</div>
-                        <textarea name="content"></textarea>
-                    </label>
-
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label>
+                                <h2>title</h2>
+                                <input type="text" name="title">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label>
+                                <h2>content</h2>
+                                <textarea name="content"></textarea>
+                            </label>
+                        </div>
+                    </div>
                     <input type="submit">
                 </form>
             </body>
