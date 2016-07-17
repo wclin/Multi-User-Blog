@@ -32,9 +32,9 @@ class Alert():
     """A simple class represent bootstrap alert.
 
     Attributes:
-            category (str): corresponding to 4 bootstrap alert class:
-                    ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
-            message (str): The string shows on alert.
+        category (str): corresponding to 4 bootstrap alert class:
+            ['alert-success', 'alert-info', 'alert-warning', 'alert-danger']
+        message (str): The string shows on alert.
 
     """
     @classmethod  # Or maybe __init__ is fine
@@ -46,13 +46,32 @@ class Alert():
 
 
 class Author(db.Model):
+    """A simple author entity.
+
+    Attributes:
+        name (StringProperty(required=True)): The name of author, which is unique.
+        pwdh (StringProperty(required=True)): The bcrypt hash of password.
+        email (StringProperty): The email of author.
+        dscr (TextProperty): The description of author will show on sidebar.
+
+    """
     name = db.StringProperty(required=True)
     pwdh = db.StringProperty(required=True)
-    eamil = db.StringProperty()
+    email = db.StringProperty()
     dscr = db.TextProperty()
 
 
 class Post(db.Model):
+    """A simple post entity.
+
+    Attributes:
+        author (ReferenceProperty(Author)): Every post belongs to one user.
+        title (StringProperty): The title of post.
+        content (TextProperty): The content of post. Support html format.
+        created (DateTimeProperty(auto_now_atdd=True)): The time of post created.
+        likes (IntegerProperty(default=0)): The number of likes of post. For every post, the user can only like once.
+        isLiked (BooleanProperty): Which is used to control Like/Unlike.
+    """
     author = db.ReferenceProperty(Author)
     title = db.StringProperty()
     content = db.TextProperty()
@@ -64,6 +83,17 @@ class Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         template = JINJA_ENVIRONMENT.get_template('post.html')
         return template.render(template_values)
+
+
+class Likes(db.Model):
+    """An entity in order to represent the many-to-many relation about the preference of users about posts. The existence of the instance(user:u, post:p), indicate u like p.
+
+    Attributes:
+        user (ReferenceProperty(Author)
+        post (ReferenceProperty(Post))
+    """
+    user = db.ReferenceProperty(Author)
+    post = db.ReferenceProperty(Post)
 
 
 class Handler(webapp2.RequestHandler):
@@ -81,17 +111,26 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
-    def getName(self):  # return valid name or None
+    def getName(self):
+        """
+        Return valid Author.name if cookies are valid, else return None
+        """
         user = self.getUser()
         return user.name if user else None
 
-    def getUser(self):  # return Author or None
+    def getUser(self):
+        """
+        Return valid Author object if cookies are valid, else return None
+        """
         cookie = self.request.cookies.get('uname')
         uname, token = cookie.split('|') if cookie else ('', None)
         uname = uname if uname != '' and valid_pw(uname, '', token) else None
         return Author.get_by_key_name(uname) if uname else None
 
-    def setName(self, user=None):  # set Uname Cookie	from Author
+    def setName(self, user=None):
+        """
+        Set a valid cookie from Author object
+        """
         if user:
             token = make_pw_hash(str(user.name), '')
             self.response.headers.add_header(
@@ -100,30 +139,40 @@ class Handler(webapp2.RequestHandler):
             self.response.headers.add_header('Set-Cookie', 'uname=%s' % '|')
 
     def getAlert(self):
+        """
+        Return an Alert object from url request info: message and categor
+        """
         message = self.request.get('message')
         category = self.request.get('category')
         return Alert.set(category, message)
 
     def getPost(self):
+        """
+        Return an Post object from url request info: post_id
+        """
         post_id = self.request.get("post_id")
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         return db.get(key)
 
     def unEditable(self, p):
+        """
+        Redirect to the page of given Post object, with alert message.
+        """
         alert = dict(category="alert-danger", message="It's not your post!")
         self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 
     def isLiked(self, p):
+        """
+        Return if the given post is liked by this user before.
+        """
         u = self.getUser()
-        return Likes.all().filter('user =', u).filter('post =', p).get()
-
-
-class Likes(db.Model):
-    user = db.ReferenceProperty(Author)
-    post = db.ReferenceProperty(Post)
+        return Likes.all().filter('user =', u).filter('post =', p).get() and u
 
 
 class MainPage(Handler):
+    """
+    The page show posts of current user.
+    """
 
     def get(self):
         author = self.getUser()
@@ -137,14 +186,16 @@ class MainPage(Handler):
                     author).order('-created')}
             template = JINJA_ENVIRONMENT.get_template('index.html')
             self.response.write(template.render(template_values))
-            #self.render("index.html", author = self.getName(), posts = posts)
+            # self.render("index.html", template_values) can't work
         else:
             alert = dict(category="alert-warning", message="Login le ma?")
             self.redirect("/Login?%s" % urllib.urlencode(alert))
-            # self.redirect("/Login")
 
 
 class Timeline(Handler):
+    """
+    The page show posts of every user.
+    """
 
     def get(self):
         posts = Post.all().order('-created').fetch(limit=100)
@@ -157,7 +208,6 @@ class Timeline(Handler):
         }
         template = JINJA_ENVIRONMENT.get_template('timeline.html')
         self.response.write(template.render(template_values))
-        #self.render("timeline.html", author = self.getName(), posts = posts)
 
 
 class Like(Handler):
@@ -213,15 +263,12 @@ class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         post = db.get(key)
-        # So weird \/
         template_values = {
             'user': self.getName(),
             'alert': self.getAlert(),
             'p': post,
             'post_id': post_id
         }
-        #template = JINJA_ENVIRONMENT.get_template('permalink.html')
-        # self.response.write(template.render(template_values))
         self.render(
             "permalink.html",
             post=post,
@@ -255,7 +302,6 @@ class EditPost(Handler):
         }
         template = JINJA_ENVIRONMENT.get_template('editpost.html')
         self.response.write(template.render(template_values))
-        #self.render("editpost.html", template_values)
 
     def post(self):
         p = self.getPost()
@@ -278,7 +324,6 @@ class NewPost(Handler):
             }
             template = JINJA_ENVIRONMENT.get_template('newpost.html')
             self.response.write(template.render(template_values))
-            #self.render("newpost.html", author = self.getName())
         else:
             alert = dict(category="alert-warning", message="Login first yo")
             self.redirect("/Login?%s" % urllib.urlencode(alert))
@@ -313,7 +358,6 @@ class SignUp(Handler):
         }
         template = JINJA_ENVIRONMENT.get_template('signup.html')
         self.response.write(template.render(template_values))
-        #self.render("signup.html", author = self.getName())
 
     def post(self):
         name = self.request.get("username")
@@ -334,7 +378,6 @@ class SignUp(Handler):
                 username=name,
                 email=email,
                 description=dscr)
-            #self.redirect("/SignUp?%s" % urllib.urlencode(alert))
             return
         if a:
             alert = dict(category="alert-danger", message="Duplicate!")
@@ -345,7 +388,6 @@ class SignUp(Handler):
                 username=name,
                 email=email,
                 description=dscr)
-            #self.redirect("/SignUp?%s" % urllib.urlencode(alert))
             return
         else:
             a = Author(
@@ -368,7 +410,6 @@ class Login(Handler):
         }
         template = JINJA_ENVIRONMENT.get_template('login.html')
         self.response.write(template.render(template_values))
-        #self.render("login.html", template_values)
 
     def post(self):
         name = self.request.get("username")
