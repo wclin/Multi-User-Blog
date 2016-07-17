@@ -15,7 +15,10 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 
 
 ## TODO
-
+<ul>
+<li>Only signed in users can post comments.</li>
+<li>Users can only edit and delete comments they themselves have made.</li>
+</ul>
 
 ## Miner
 
