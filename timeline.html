@@ -2,6 +2,13 @@
 
 {% set active_page = 'timeline' %}
 
+{% block header %}
+      <div class="blog-header">
+        <h1 class="blog-title">Timeline</h1>
+        <p class="lead blog-description">Hey {{user}}! Here you can see everybody's posts!</p>
+      </div>
+{% endblock %}
+
     {% block content %}
 
       <div class="row">
@@ -18,7 +25,7 @@
             {% endif %}
 
             <p class="blog-post-meta">{{post.created}} by <a href="#">{{post.author.name}}</a></p>
-            {{post.content}}
+            {{post.content.replace('\n', '<br>') | safe}}
             <p class="blog-post-meta"><a href="/{{post.key().id()}}">See more</a></p>
           </div><!-- /.blog-post -->
           {% endfor %}

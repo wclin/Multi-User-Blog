@@ -4,7 +4,7 @@
       <div class="blog-header">
         <h1 class="blog-title">{{p.title}}</h1>
         <p class="lead blog-description">
-          by {{p.author.name}} at {{p.created.strftime("%b %d, %Y")}}</p>
+          by {{p.author.name}} at {{p.created.strftime("%b %d, %Y")}} <a href="/EditPost?post_id={{p.key().id()}}">Edit</a> <a href="/DeletePost?post_id={{p.key().id()}}">Delete</a></p>
       </div>
 {% endblock %}
 

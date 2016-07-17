@@ -10,7 +10,8 @@
           <div class="blog-post">
             <h2 class="blog-post-title">{{post.title}} </h2>
             <p class="blog-post-meta">{{post.created}} by <a href="#">{{post.author.name}}</a></p>
-            {{post.content}}
+            {{post.content.replace('\n', '<br>') | safe}}
+            <p class="blog-post-meta"><a href="/{{post.key().id()}}">See more</a></p>
           </div><!-- /.blog-post -->
           {% endfor %}
 
