@@ -24,7 +24,7 @@
               <a href="/Like?post_id={{post.key().id()}}">Like</a>
             {% endif %}
 
-            <p class="blog-post-meta">{{post.created}} by <a href="#">{{post.author.name}}</a></p>
+            <p class="blog-post-meta">{{post.created}} by {{post.author.name}}</p>
             {{post.content.replace('\n', '<br>') | safe}}
             <p class="blog-post-meta"><a href="/{{post.key().id()}}">See more</a></p>
           </div><!-- /.blog-post -->
