@@ -7,23 +7,26 @@ A multi user blog build on google app engine.
 
 ## How to run?
 
-First, enter some secret text into secret.txt
-`$ echo "SOME_SECRET" >> secret.txt`
-Then, running the local development server by
-`$ dev_appserver.py app.yaml `
-You can visit the application at this URL: http://localhost:8080/.
+First, enter some secret text into secret.txt <br />
+`$ echo "SOME_SECRET" >> secret.txt` <br />
+Then, running the local development server by <br />
+`$ dev_appserver.py app.yaml ` <br />
+You can visit the application at this URL: http://localhost:8080/. <br />
 
 
 ## TODO
 
-v Error Message
-v Edit/Delete Posts
-v Like/Unlike Posts
-
 
 ## Miner
 
-v Login page should have a link to signup page and vice-versa
-v Users editing a page can click on a link to cancel the edit and go back to viewing that page.
-v Users can like/unlike posts, but not their own.
+
+## Done
+<ul>
+<li>Error Message</li>
+<li>Edit/Delete Posts</li>
+<li>Like/Unlike Posts</li>
+<li>Login page should have a link to signup page and vice-versa <br />
+<li>Users editing a page can click on a link to cancel the edit and go back to viewing that page.</li>
+<li>Users can like/unlike posts, but not their own.</li>
+</ul>
 
