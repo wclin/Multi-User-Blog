@@ -16,12 +16,14 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 
 ## TODO
 <ul>
-<li>Only signed in users can post comments.</li>
 <li>Users can only edit and delete comments they themselves have made.</li>
+<li>Modal post create/edit.
 </ul>
 
 ## Miner
-
+<ul>
+<li>JJ alert.
+<ul>
 
 ## Done
 <ul>
@@ -31,5 +33,6 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 <li>Login page should have a link to signup page and vice-versa <br />
 <li>Users editing a page can click on a link to cancel the edit and go back to viewing that page.</li>
 <li>Users can like/unlike posts, but not their own.</li>
+<li>Only signed in users can post comments.</li>
 </ul>
 
