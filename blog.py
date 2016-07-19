@@ -84,6 +84,20 @@ class Post(db.Model):
         template = JINJA_ENVIRONMENT.get_template('post.html')
         return template.render(template_values)
 
+class Comment(db.Model):
+    """A simple comment entity.
+
+    Attributes:
+        author (ReferenceProperty(Author)): Every comment belongs to one user.
+        post (ReferenceProperty(Post)): Every comment belongs to one post.
+        content (TextProperty): The content of comment. Support html format.
+        created (DateTimeProperty(auto_now_atdd=True)): The time of comment created.
+     """
+    author = db.ReferenceProperty(Author)
+    post = db.ReferenceProperty(Post)
+    content = db.TextProperty()
+    created = db.DateTimeProperty(auto_now_add=True)
+
 
 class Likes(db.Model):
     """An entity in order to represent the many-to-many relation about the preference of users about posts. The existence of the instance(user:u, post:p), indicate u like p.
@@ -269,7 +283,8 @@ class PostPage(Handler):
             'user': self.getName(),
             'alert': self.getAlert(),
             'p': post,
-            'post_id': post_id
+            'post_id': post_id,
+            'comments': Comment.all().filter('post =', post).order('-created')
         }
         self.render(
             "permalink.html",
@@ -354,6 +369,27 @@ class NewPost(Handler):
         alert = dict(category="alert-success", message="Here~")
         self.redirect("/%s?%s" %
                       (str(p.key().id()), urllib.urlencode(alert)))
+
+
+class NewComment(Handler):
+
+    def post(self):
+        author = self.getUser()
+        post = self.getPost()
+        content = self.request.get("content")
+        if not author:
+            self.loginFirst()
+            return
+        c = Comment(
+            author=author,
+            post=post,
+            content=content)
+        c.put()
+        alert = dict(category="alert-success", message="Comment Success!")
+        self.redirect("/%s?%s" %
+                      (str(post.key().id()), urllib.urlencode(alert)))
+
+
 
 
 class SignUp(Handler):
@@ -458,6 +494,9 @@ app = webapp2.WSGIApplication([
     ('/NewPost', NewPost),
     ('/EditPost', EditPost),
     ('/DeletePost', DeletePost),
+    ('/NewComment', NewComment),
+    #('/EditComment', EditComment),
+    #('/DeleteComment', DeleteComment),
     ('/Like', Like),
     ('/UnLike', UnLike),
     ('/SignUp', SignUp),
