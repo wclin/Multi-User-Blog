@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import json
 import jinja2
 import webapp2
 import urllib
@@ -375,6 +376,7 @@ class NewComment(Handler):
 
     def post(self):
         author = self.getUser()
+        log.info("@@@@@@@@@@@@ post_id=%s @@@@@@@@@@@@" % self.request.get("post_id"))
         post = self.getPost()
         content = self.request.get("content")
         if not author:
@@ -386,9 +388,12 @@ class NewComment(Handler):
             content=content)
         c.put()
         alert = dict(category="alert-success", message="Comment Success!")
-        self.redirect("/%s?%s" %
-                      (str(post.key().id()), urllib.urlencode(alert)))
-
+        
+        #self.redirect("/%s?%s" %
+        #              (str(post.key().id()), urllib.urlencode(alert)))
+        self.response.headers['Content-Type'] = 'application/json'   
+        obj = {'redirect':  '/'+(str(post.key().id())+'?'+ urllib.urlencode(alert))} 
+        self.response.out.write(json.dumps(obj))
 
 
 
