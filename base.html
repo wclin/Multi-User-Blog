@@ -42,9 +42,12 @@
             href="{{ href|e }}">{{ caption|e }}
             </a>
           {% endfor %}
+          <!-- Trigger the modal with a button -->
+          <button type="button" class="btn btn-info" data-toggle="modal" data-target="#newPostModal">NewPost</button>
         </nav>
       </div>
     </div>
+    <div id = "alert_placeholder"></div>
     {% if alert.message %}
       <div class="alert {{alert.category}} fade in">
           <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -72,6 +75,29 @@
       </p>
     </footer>
 
+    <!-- Create Post Modal -->
+      <div id="newPostModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Post</h4>
+            </div>
+            <div class="modal-body">
+              <form action="/NewPost" class="post" id="newPostForm">
+                <input type="text" name="title">
+                <textarea name="content"></textarea>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <input class="btn btn-success" type="submit" value="Send!" id="newPostSubmit">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div><!-- /Modal content-->
+        </div>
+      </div><!-- /Modal -->
 
     <!-- Bootstrap core JavaScript
     ================================================== -->

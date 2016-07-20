@@ -6,6 +6,7 @@ import webapp2
 import urllib
 from libs.bcrypt import bcrypt
 import logging as log
+import time
 
 from google.appengine.ext import db
 
@@ -181,7 +182,7 @@ class Handler(webapp2.RequestHandler):
         """
         Redirect to the page of given Post object, with alert message.
         """
-        alert = dict(category="alert-danger", message="It's not your post!")
+        alert = dict(category="alert-danger", message="It's not yours!")
         self.redirect("/%s?%s" % (str(p.key().id()), urllib.urlencode(alert)))
 
     def loginFirst(self):
@@ -189,6 +190,9 @@ class Handler(webapp2.RequestHandler):
         Redirect to the Login page, with alert message.
         """
         alert = dict(category="alert-warning",message="Login before action!")
+        #self.response.headers['Content-Type'] = 'application/json'   
+        #obj = {'redirect':  '/Login?%s' % urllib.urlencode(alert)}
+        #self.response.out.write(json.dumps(obj))
         self.redirect("/Login?%s" % urllib.urlencode(alert))
         
     def isLiked(self, p):
@@ -259,6 +263,7 @@ class Like(Handler):
         l.put()
         p.likes = p.likes + 1
         p.put()
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         alert = dict(category="alert-success", message="Like!!")
         self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 
@@ -279,6 +284,7 @@ class UnLike(Handler):
         l.delete()
         p.likes = p.likes - 1
         p.put()
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         alert = dict(category="alert-success", message="UnLike!!")
         self.redirect("/Timeline?%s" % urllib.urlencode(alert))
 
@@ -346,6 +352,7 @@ class EditPost(Handler):
         p.title = self.request.get("title")
         p.content = self.request.get("content")
         p.put()
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         self.redirect("/%s" % str(p.key().id()))
 
 
@@ -375,9 +382,11 @@ class NewPost(Handler):
             title=title,
             content=content)
         p.put()
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         alert = dict(category="alert-success", message="Here~")
-        self.redirect("/%s?%s" %
-                      (str(p.key().id()), urllib.urlencode(alert)))
+        self.response.headers['Content-Type'] = 'application/json'   
+        obj = {'redirect':  '/'+(str(p.key().id())+'?'+ urllib.urlencode(alert))}
+        self.response.out.write(json.dumps(obj))
 
 
 class NewComment(Handler):
@@ -394,11 +403,10 @@ class NewComment(Handler):
             post=post,
             content=content)
         c.put()
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         alert = dict(category="alert-success", message="Comment Success!")
-        #self.redirect("/%s?%s" %
-        #              (str(post.key().id()), urllib.urlencode(alert)))
         self.response.headers['Content-Type'] = 'application/json'   
-        obj = {'redirect':  '/'+(str(post.key().id())+'?'+ urllib.urlencode(alert))} 
+        obj = {'redirect':  '/'+(str(post.key().id())+'?'+ urllib.urlencode(alert))}
         self.response.out.write(json.dumps(obj))
 
 
@@ -415,7 +423,7 @@ class EditComment(Handler):
             return
         c.content = self.request.get("content")
         c.put()
-        #self.redirect("/%s" % str(p.key().id()))
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         alert = dict(category="alert-success", message="Comment Edit Success!")
         self.response.headers['Content-Type'] = 'application/json'   
         obj = {'redirect':  '/'+(str(post.key().id())+'?'+ urllib.urlencode(alert))} 

@@ -1,22 +1,55 @@
 $(document).ready(function () {
+    $("input#newPostSubmit").click(function(){
+        var $form = $("#newPostForm"),
+            title = $form.find("input[name='title']").val(),
+            content = $form.find( "textarea[name='content']" ).val(),
+            url = $form.attr( "action" );
+        $.post( url, {title: title, content: content} )
+            .always(function( data ) {
+                if (data.redirect) {
+                    window.location.replace(data.redirect);
+                }
+                else {
+                    window.location.reload();
+                }
+            });
+    });
+    $("input#editPostSubmit").click(function(){
+        var $form = $("#editPostForm"),
+            title = $form.find("input[name='title']").val(),
+            content = $form.find( "textarea[name='content']" ).val(),
+            url = $form.attr( "action" );
+        $.post( url, {title: title, content: content} );
+        $('#editPostModal').modal('hide');
+    });
     $("input#newCommentSubmit").click(function(){
         var $form = $("#newCommentForm"),
             content = $form.find( "textarea[name='content']" ).val(),
             url = $form.attr( "action" );
         $.post( url, {content: content} )
-            .success(function( data ) {
-            window.location.replace(data.redirect);
+            .always(function( data ) {
+                if (data.redirect) {
+                    window.location.replace(data.redirect);
+                }
+                else {
+                    window.location.reload();
+                }
             });
-        $("#newCommentModal").modal('hide'); //hide popup
     });
     $("input#editCommentSubmit").click(function(){
         var $form = $("#editCommentForm"),
             content = $form.find( "textarea[name='content']" ).val(),
             url = $form.attr( "action" );
         $.post( url, {content: content} )
-            .success(function( data ) {
-            window.location.replace(data.redirect);
+            .always(function( data ) {
+                if (data.redirect) {
+                    window.location.replace(data.redirect);
+                }
+                else {
+                    window.location.reload();
+                }
             });
-        $("#editCommentModal").modal('hide'); //hide popup
     });
 });
+
+
