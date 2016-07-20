@@ -169,6 +169,14 @@ class Handler(webapp2.RequestHandler):
         key = db.Key.from_path("Post", int(post_id), parent=blog_key())
         return db.get(key)
 
+    def getComment(self):
+        """
+        Return an Comment object from url request info: comment_id
+        """
+        comment_id = self.request.get("comment_id")
+        key = db.Key.from_path("Comment", int(comment_id))
+        return db.get(key)
+
     def unEditable(self, p):
         """
         Redirect to the page of given Post object, with alert message.
@@ -376,7 +384,6 @@ class NewComment(Handler):
 
     def post(self):
         author = self.getUser()
-        log.info("@@@@@@@@@@@@ post_id=%s @@@@@@@@@@@@" % self.request.get("post_id"))
         post = self.getPost()
         content = self.request.get("content")
         if not author:
@@ -388,12 +395,47 @@ class NewComment(Handler):
             content=content)
         c.put()
         alert = dict(category="alert-success", message="Comment Success!")
-        
         #self.redirect("/%s?%s" %
         #              (str(post.key().id()), urllib.urlencode(alert)))
         self.response.headers['Content-Type'] = 'application/json'   
         obj = {'redirect':  '/'+(str(post.key().id())+'?'+ urllib.urlencode(alert))} 
         self.response.out.write(json.dumps(obj))
+
+
+class EditComment(Handler):
+
+    def post(self):
+        if not self.getUser():
+            self.loginFirst()
+            return
+        c = self.getComment()
+        post = c.post
+        if self.getName() != c.author.name:
+            self.unEditable(post)
+            return
+        c.content = self.request.get("content")
+        c.put()
+        #self.redirect("/%s" % str(p.key().id()))
+        alert = dict(category="alert-success", message="Comment Edit Success!")
+        self.response.headers['Content-Type'] = 'application/json'   
+        obj = {'redirect':  '/'+(str(post.key().id())+'?'+ urllib.urlencode(alert))} 
+        self.response.out.write(json.dumps(obj))
+
+
+class DeleteComment(Handler):
+
+    def get(self):
+        if not self.getUser():
+            self.loginFirst()
+            return
+        c = self.getComment()
+        post = c.post
+        if self.getName() != c.author.name:
+            self.unEditable(post)
+            return
+        c.delete()
+        alert = dict(category="alert-success", message="Deleted!!")
+        self.redirect("/%s?%s" % (str(post.key().id()), urllib.urlencode(alert)))
 
 
 
@@ -500,8 +542,8 @@ app = webapp2.WSGIApplication([
     ('/EditPost', EditPost),
     ('/DeletePost', DeletePost),
     ('/NewComment', NewComment),
-    #('/EditComment', EditComment),
-    #('/DeleteComment', DeleteComment),
+    ('/EditComment', EditComment),
+    ('/DeleteComment', DeleteComment),
     ('/Like', Like),
     ('/UnLike', UnLike),
     ('/SignUp', SignUp),
