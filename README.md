@@ -14,7 +14,7 @@ Then, running the local development server by <br />
 You can visit the application at this URL: http://localhost:8080/. <br />
 
 
-## TODO
+## Todo
 <ul>
 <li>Users can only edit and delete comments they themselves have made.</li>
 <li>Modal post create/edit.
@@ -23,7 +23,7 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 ## Miner
 <ul>
 <li>JJ alert.
-<ul>
+</ul>
 
 ## Done
 <ul>
@@ -35,4 +35,3 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 <li>Users can like/unlike posts, but not their own.</li>
 <li>Only signed in users can post comments.</li>
 </ul>
-

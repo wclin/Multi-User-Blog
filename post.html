@@ -4,7 +4,7 @@
       <div class="blog-header">
         <h1 class="blog-title">{{p.title}}</h1>
         <p class="lead blog-description">
-          by {{p.author.name}} at {{p.created.strftime("%b %d, %Y")}} <a href="/EditPost?post_id={{p.key().id()}}">Edit</a> <a href="/DeletePost?post_id={{p.key().id()}}">Delete</a></p>
+          by {{p.author.name}} at {{p.created.strftime("%b %d, %Y")}} <a href="/EditPost?post_id={{p.key().id()}}" class="btn btn-warning">Edit</a> <a href="/DeletePost?post_id={{p.key().id()}}" class="btn btn-warning">Delete</a></p>
       </div>
 {% endblock %}
 
@@ -21,24 +21,31 @@
 
       </div>
 
-      <form action="/NewComment?post_id={{p.key().id()}}" method="post">
-        <div class="row">
-            <div class="col-sm-8">
-                <label>
-                    <h2>Comment</h2>
-                    <textarea name="content"></textarea>
-                </label>
-            </div>
-        </div>
-        <input type="submit">
-      </form>
+      <!-- Trigger the modal with a button -->
+      <button type="button" class="btn btn-info" data-toggle="modal" data-target="#commentModal">Comment</button>
 
-      <nav>
-        <ul class="pager">
-            <li><a href="/EditPost?post_id={{p.key().id()}}">Edit</a></li>
-            <li><a href="/DeletePost?post_id={{p.key().id()}}">Delete</a></li>
-        </ul>
-      </nav>
+      <!-- Modal -->
+      <div id="commentModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Comment</h4>
+            </div>
+            <div class="modal-body">
+              <form action="/NewComment?post_id={{p.key().id()}}" class="comment" id="commentForm">
+                <textarea name="content"></textarea>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <input class="btn btn-success" type="submit" value="Send!" id="commentSubmit">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div><!-- /Modal content-->
+        </div>
+      </div><!-- /Modal -->
     </div><!-- /.blog-main -->
     <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
       <div class="sidebar-module">
@@ -49,35 +56,6 @@
           {% endfor %}
         </ol>
       </div>
-
-<!-- Trigger the modal with a button -->
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Comment</button>
-
-<!-- Modal -->
-<div id="myModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Comment</h4>
-      </div>
-      <div class="modal-body">
-        <form action="/NewComment?post_id={{p.key().id()}}" class="comment" id="commentForm">
-          <textarea name="content"></textarea>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <input class="btn btn-success" type="submit" value="Send!" id="submit">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
     </div><!-- /.blog-sidebar -->
   </div><!-- /.row -->
 

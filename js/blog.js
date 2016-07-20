@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    $("input#submit").click(function(){
+    $("input#commentSubmit").click(function(){
         var $form = $("#commentForm"),
             content = $form.find( "textarea[name='content']" ).val(),
             url = $form.attr( "action" );
@@ -7,6 +7,6 @@ $(document).ready(function () {
             .success(function( data ) {
             window.location.replace(data.redirect);
             });
-        $("#myModal").modal('hide'); //hide popup
+        $("#commentModal").modal('hide'); //hide popup
     });
 });
