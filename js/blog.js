@@ -19,8 +19,15 @@ $(document).ready(function () {
             title = $form.find("input[name='title']").val(),
             content = $form.find( "textarea[name='content']" ).val(),
             url = $form.attr( "action" );
-        $.post( url, {title: title, content: content} );
-        $('#editPostModal').modal('hide');
+        $.post( url, {title: title, content: content} )
+            .always(function( data ) {
+                if (data.redirect) {
+                    window.location.replace(data.redirect);
+                }
+                else {
+                    window.location.reload();
+                }
+            });
     });
     $("input#newCommentSubmit").click(function(){
         var $form = $("#newCommentForm"),
@@ -51,5 +58,7 @@ $(document).ready(function () {
             });
     });
 });
-
+$("#editCommentModal").addEventListener("load", function(event) {
+    // Need fix
+});
 
