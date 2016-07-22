@@ -123,7 +123,6 @@ class Handler(webapp2.RequestHandler):
 
     def __init__(self, request, response):
         self.initialize(request, response)
-        self.alert = None
 
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -185,15 +184,12 @@ class Handler(webapp2.RequestHandler):
         key = db.Key.from_path("Comment", int(comment_id))
         return db.get(key)
 
-    def redirectJson(self, url, alert):
+    def redirectJson(self, url, a):
         """
         Redirect by return json obj.
         """
-        a = dict(category=alert.category,message=alert.message)
         self.response.headers['Content-Type'] = 'application/json'
-        obj = {'redirect': '%s?%s' % (url, urllib.urlencode(a)),
-                'alerttype': alert.category,
-                'message': alert.message}
+        obj = {'redirect': '%s?%s' % (url, urllib.urlencode(a))}
         self.response.out.write(json.dumps(obj))
 
     def isLiked(self, p):
@@ -223,10 +219,9 @@ class MainPage(Handler):
             self.response.write(template.render(template_values))
             # self.render("index.html", template_values) can't work
         else:
-            alert = dict(
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
                 category="alert-warning",
-                message="Login before action!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+                message="Login before action!")))
 
 
 class Timeline(Handler):
@@ -252,19 +247,18 @@ class Like(Handler):
     def get(self):
         u = self.getUser()
         if not u:
-            alert = dict(
-                category="alert-warning",
-                message="Login before action!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
+                category="alert-warning", 
+                message="Login before action!")))
             return
         p = self.getPost()
         if self.isLiked(p):
-            alert = dict(category="alert-danger", message="Already liked!!")
-            self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+            self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+                category="alert-danger", message="Already liked!!")))
             return
         if u and u.name == p.author.name:
-            alert = dict(category="alert-danger", message="You self-lover!")
-            self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+            self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+                category="alert-danger", message="You self-lover!")))
             return
         l = Likes(user=u, post=p)
         l.put()
@@ -272,8 +266,8 @@ class Like(Handler):
         p.put()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
-        alert = dict(category="alert-success", message="Like!!")
-        self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+        self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+            category="alert-success", message="Like!!")))
 
 
 class UnLike(Handler):
@@ -281,21 +275,19 @@ class UnLike(Handler):
     def get(self):
         p = self.getPost()
         if not self.isLiked(p):
-            alert = dict(category="alert-danger", message="Didn't like yet!!")
-            self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+            self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+                category="alert-danger", message="Didn't like yet!!")))
             return
         l = Likes.all().filter(
-            'user =',
-            self.getUser()).filter(
-            'post =',
-            p).get()
+            'user =', self.getUser()).filter(
+            'post =', p).get()
         l.delete()
         p.likes = p.likes - 1
         p.put()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
-        alert = dict(category="alert-success", message="UnLike!!")
-        self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+        self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+            category="alert-success", message="UnLike!!")))
 
 
 class PostPage(Handler):
@@ -321,42 +313,40 @@ class DeletePost(Handler):
     def get(self):
         p = self.getPost()
         if not self.getUser():
-            alert = dict(
-                category="alert-warning",
-                message="Login before action!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
+                category="alert-warning", 
+                message="Login before action!")))
             return
         if self.getName() != p.author.name:
-            alert = dict(category="alert-danger", message="It's not yours!")
             self.redirect("/%s?%s" %
-                          (str(p.key().id()), urllib.urlencode(alert)))
+                          (str(p.key().id()), urllib.urlencode(dict(
+                              category="alert-danger", 
+                              message="It's not yours!"))))
             return
         p.delete()
-        alert = dict(category="alert-success", message="Deleted!!")
-        self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+        self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+            category="alert-success", message="Deleted!!")))
 
 
 class EditPost(Handler):
 
     def post(self):
         if not self.getUser():
-            alert = dict(
-                category="alert-warning",
-                message="Login before action!")
-            self.redirectJson("/Login", Alert.dict(alert))
+            self.redirectJson("/Login", dict(
+                category="alert-warning", message="Login before action!"))
             return
         p = self.getPost()
         if self.getName() != p.author.name:
-            alert = dict(category="alert-danger", message="It's not yours!")
-            self.redirectJson("/" + str(p.key().id()), Alert.dict(alert))
+            self.redirectJson("/" + str(p.key().id()), dict(
+                category="alert-danger", message="It's not yours!"))
             return
         p.title = self.request.get("title")
         p.content = self.request.get("content")
         p.put()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
-        alert = dict(category="alert-success", message="check please~")
-        self.redirectJson("/" + str(p.key().id()), Alert.dict(alert))
+        self.redirectJson("/" + str(p.key().id()), dict(
+            category="alert-success", message="check please~"))
 
 
 class NewPost(Handler):
@@ -366,10 +356,9 @@ class NewPost(Handler):
         title = self.request.get("title")
         content = self.request.get("content")
         if not author:
-            alert = dict(
-                category="alert-warning",
-                message="Login before action!")
-            self.redirectJson("/Login", Alert.dict(alert))
+            self.redirectJson("/Login", dict(
+                category="alert-warning", 
+                message="Login before action!"))
             return
         p = Post(
             parent=blog_key(),
@@ -379,8 +368,8 @@ class NewPost(Handler):
         p.put()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
-        alert = dict(category="alert-success", message="Here~")
-        self.redirectJson("/" + str(post.key().id()), Alert.dict(alert))
+        self.redirectJson("/" + str(post.key().id()), dict(
+            category="alert-success", message="Here~"))
 
 
 class NewComment(Handler):
@@ -390,10 +379,9 @@ class NewComment(Handler):
         post = self.getPost()
         content = self.request.get("content")
         if not author:
-            alert = dict(
+            self.redirectJson("/Login", dict(
                 category="alert-warning",
-                message="Login before action!")
-            self.redirectJson("/Login", Alert.dict(alert))
+                message="Login before action!"))
             return
         c = Comment(
             author=author,
@@ -402,56 +390,56 @@ class NewComment(Handler):
         c.put()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
-        alert = dict(category="alert-success", message="Comment Success!")
-        self.redirectJson("/" + str(post.key().id()), Alert.dict(alert))
+        self.redirectJson("/" + str(post.key().id()), dict(
+            category="alert-success", 
+            message="Comment Success!"))
 
 
 class EditComment(Handler):
 
     def post(self):
         if not self.getUser():
-            alert = dict(
+            self.redirectJson("/Login", dict(
                 category="alert-warning",
-                message="Login before action!")
-            self.redirectJson("/Login", Alert.dict(alert))
+                message="Login before action!"))
             return
         c = self.getComment()
         p = c.post
         if self.getName() != c.author.name:
-            alert = dict(category="alert-danger", message="It's not yours!")
-            self.redirectJson("/" + str(p.key().id()), Alert.dict(alert))
+            self.redirectJson("/" + str(p.key().id()), dict(
+                category="alert-danger", 
+                message="It's not yours!"))
             return
         c.content = self.request.get("content")
         c.put()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
-        alert = dict(category="alert-success", message="Comment Edit Success!")
-        self.redirectJson("/" + str(p.key().id()), Alert.dict(alert))
+        self.redirectJson("/" + str(p.key().id()), dict(
+            category="alert-success", 
+            message="Comment Edit Success!"))
 
 
 class DeleteComment(Handler):
 
     def get(self):
         if not self.getUser():
-            alert = dict(
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
                 category="alert-warning",
-                message="Login before action!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+                message="Login before action!")))
             return
         c = self.getComment()
         p = c.post
         if self.getName() != c.author.name:
-            alert = dict(category="alert-danger", message="It's not yours!")
-            self.redirect("/%s?%s" %
-                          (str(p.key().id()), urllib.urlencode(alert)))
+            self.redirect("/%s?%s" % 
+                    (str(p.key().id()), urllib.urlencode(dict(
+                        category="alert-danger", 
+                        message="It's not yours!"))))
             return
         c.delete()
-        alert = dict(category="alert-success", message="Deleted!!")
-        self.redirect(
-            "/%s?%s" %
-            (str(
-                p.key().id()),
-                urllib.urlencode(alert)))
+        self.redirect("/%s?%s" %
+                (str(p.key().id()), urllib.urlencode(dict(
+                    category="alert-success", 
+                    message="Deleted!!"))))
 
 
 class SignUp(Handler):
@@ -524,33 +512,32 @@ class Login(Handler):
             self.setName(u)
             self.redirect("/Welcome")
         else:
-            alert = dict(category="alert-warning", message="Try again~")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
+                category="alert-warning", message="Try again~")))
 
 
 class Logout(Handler):
 
     def get(self):
         if not self.getUser():
-            alert = dict(
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
                 category="alert-warning",
-                message="Login before action!")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+                message="Login before action!")))
             return
         self.setName()
-        alert = dict(category="alert-success", message="Bye~")
-        self.redirect("/Login?%s" % urllib.urlencode(alert))
+        self.redirect("/Login?%s" % urllib.urlencode(dict(
+            category="alert-success", message="Bye~")))
 
 
 class Welcome(Handler):
 
     def get(self):
         if self.getName():
-            alert = dict(category="alert-success", message="Welcome!")
-            self.redirect("/Timeline?%s" % urllib.urlencode(alert))
+            self.redirect("/Timeline?%s" % urllib.urlencode(dict(
+                category="alert-success", message="Welcome!")))
         else:
-            alert = dict(category="alert-danger", message="Nooooo")
-            self.redirect("/Login?%s" % urllib.urlencode(alert))
+            self.redirect("/Login?%s" % urllib.urlencode(dict(
+                category="alert-danger", message="Nooooo")))
 
 
 app = webapp2.WSGIApplication([

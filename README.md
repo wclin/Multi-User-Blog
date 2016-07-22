@@ -17,12 +17,11 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 ## Todo
 <ul>
 <li>Users can only edit and delete comments they themselves have made.</li>
-<li>Modal post create/edit.
+<li>Modal editComment bug and preload</li>
 </ul>
 
 ## Miner
 <ul>
-<li>JJ alert.
 </ul>
 
 ## Done
@@ -34,4 +33,5 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 <li>Users editing a page can click on a link to cancel the edit and go back to viewing that page.</li>
 <li>Users can like/unlike posts, but not their own.</li>
 <li>Only signed in users can post comments.</li>
+<li>Modal post create/edit.
 </ul>
