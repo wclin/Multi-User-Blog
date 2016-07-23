@@ -10,7 +10,8 @@
           <div class="blog-post">
             <h2 class="blog-post-title">{{post.title}} </h2>
             <p class="blog-post-meta">{{post.created}} by {{post.author.name}}</p>
-            {{post.content.replace('\n', '<br>') | safe}}
+            <p class="post-content">
+            {{post.content.replace('\n', '<br>') | safe}}</p>
             <br>
             <p class="blog-post-meta"><a href="/{{post.key().id()}}">See more</a></p>
           </div><!-- /.blog-post -->
@@ -21,9 +22,9 @@
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
           <div class="sidebar-module sidebar-module-inset">
             <h4>About {{author.name}}</h4>
-            <p> {{author.dscr}} </p>
+            <p class="post-content"> {{author.dscr}} </p>
           </div>
-          <div class="sidebar-module">
+          <div class="sidebar-module post-content">
             <h4>Archives</h4>
             <ol class="list-unstyled">
               {% for post in posts %}

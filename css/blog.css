@@ -22,7 +22,13 @@ h6, .h6 {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: normal;
   color: #333;
+  word-wrap: break-word;
+
 }
+.post-content {
+  word-wrap: break-word;
+}
+
 input[type=text],
 input[type=password] {
     width: 100%;
