@@ -218,7 +218,7 @@ class MainPage(Handler):
                     author).order('-created')}
             template = JINJA_ENVIRONMENT.get_template('index.html')
             self.response.write(template.render(template_values))
-            # self.render("index.html", template_values) can't work
+            # self.render("index.html", template_values) didn't work
         else:
             self.redirect("/Login?%s" % urllib.urlencode(dict(
                 category="alert-warning",
@@ -265,8 +265,7 @@ class Like(Handler):
         l.put()
         p.likes = p.likes + 1
         p.put()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
-        time.sleep(0.1)
+        time.sleep(0.1) # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         self.redirect("/Timeline?%s" % urllib.urlencode(dict(
             category="alert-success", message="Like!!")))
 
@@ -285,7 +284,6 @@ class UnLike(Handler):
         l.delete()
         p.likes = p.likes - 1
         p.put()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirect("/Timeline?%s" % urllib.urlencode(dict(
             category="alert-success", message="UnLike!!")))
@@ -325,7 +323,6 @@ class DeletePost(Handler):
                               message="It's not yours!"))))
             return
         p.delete()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirect("/Timeline?%s" % urllib.urlencode(dict(
             category="alert-success", message="Deleted!!")))
@@ -346,7 +343,6 @@ class EditPost(Handler):
         p.title = self.request.get("title")
         p.content = self.request.get("content")
         p.put()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirectJson("/" + str(p.key().id()), dict(
             category="alert-success", message="check please~"))
@@ -369,7 +365,6 @@ class NewPost(Handler):
             title=title,
             content=content)
         p.put()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirectJson("/" + str(post.key().id()), dict(
             category="alert-success", message="Here~"))
@@ -391,7 +386,6 @@ class NewComment(Handler):
             post=post,
             content=content)
         c.put()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirectJson("/" + str(post.key().id()), dict(
             category="alert-success",
@@ -415,7 +409,6 @@ class EditComment(Handler):
             return
         c.content = self.request.get("content")
         c.put()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirectJson("/" + str(p.key().id()), dict(
             category="alert-success",
@@ -439,7 +432,6 @@ class DeleteComment(Handler):
                               message="It's not yours!"))))
             return
         c.delete()
-        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirect("/%s?%s" %
                       (str(p.key().id()), urllib.urlencode(dict(

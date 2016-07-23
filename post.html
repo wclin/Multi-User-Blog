@@ -81,7 +81,8 @@
         <ol class="list-unstyled">
           {% for comment in comments %}
             <li>
-              {{comment.author.name}}: {{comment.content}} (at {{comment.created}})
+              {{comment.author.name}}: {{comment.content}} <br>
+              (at {{comment.created}})
               <!-- Trigger the modal with a button -->
               <button type="button" class="btn btn-link btn-sm open-EditConnentModal" data-toggle="modal" data-target="#editCommentModal" data-id="{{comment.key().id()}}" data-content="{{comment.content}}">Edit</button>
 
