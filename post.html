@@ -12,7 +12,7 @@
 
   <div class="row">
 
-    <div class="col-sm-8 blog-main">
+    <div class="col-md-8 blog-main">
       <div class="post">
 
         <div class="post-content">
@@ -46,7 +46,7 @@
           </div><!-- /Modal content-->
         </div>
       </div><!-- /Modal -->
-      <a href="/DeletePost?post_id={{p.key().id()}}" class="btn btn-warning">Delete</a>
+      <a href="/DeletePost?post_id={{p.key().id()}}" class="btn btn-danger">Delete</a>
 
       <!-- Trigger the modal with a button -->
       <button type="button" class="btn btn-info" data-toggle="modal" data-target="#newCommentModal">Comment</button>
@@ -74,9 +74,10 @@
         </div>
       </div><!-- /Modal -->
     </div><!-- /.blog-main -->
-    <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+    <div class="col-md-3 col-md-offset-1 blog-sidebar">
       <div class="sidebar-module" id="comment-result">
-        <h4>Comments</h4>
+        <!-- Trigger the modal with a button -->
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#newCommentModal">Comment</button>
         <ol class="list-unstyled">
           {% for comment in comments %}
             <li>
