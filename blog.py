@@ -45,6 +45,7 @@ class Alert():
         a.category = d['category']
         a.message = d['message']
         return a
+
     @classmethod  # Or maybe __init__ is fine
     def set(cls, category, message):
         a = cls()
@@ -248,7 +249,7 @@ class Like(Handler):
         u = self.getUser()
         if not u:
             self.redirect("/Login?%s" % urllib.urlencode(dict(
-                category="alert-warning", 
+                category="alert-warning",
                 message="Login before action!")))
             return
         p = self.getPost()
@@ -314,13 +315,13 @@ class DeletePost(Handler):
         p = self.getPost()
         if not self.getUser():
             self.redirect("/Login?%s" % urllib.urlencode(dict(
-                category="alert-warning", 
+                category="alert-warning",
                 message="Login before action!")))
             return
         if self.getName() != p.author.name:
             self.redirect("/%s?%s" %
                           (str(p.key().id()), urllib.urlencode(dict(
-                              category="alert-danger", 
+                              category="alert-danger",
                               message="It's not yours!"))))
             return
         p.delete()
@@ -359,7 +360,7 @@ class NewPost(Handler):
         content = self.request.get("content")
         if not author:
             self.redirectJson("/Login", dict(
-                category="alert-warning", 
+                category="alert-warning",
                 message="Login before action!"))
             return
         p = Post(
@@ -393,7 +394,7 @@ class NewComment(Handler):
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirectJson("/" + str(post.key().id()), dict(
-            category="alert-success", 
+            category="alert-success",
             message="Comment Success!"))
 
 
@@ -409,7 +410,7 @@ class EditComment(Handler):
         p = c.post
         if self.getName() != c.author.name:
             self.redirectJson("/" + str(p.key().id()), dict(
-                category="alert-danger", 
+                category="alert-danger",
                 message="It's not yours!"))
             return
         c.content = self.request.get("content")
@@ -417,7 +418,7 @@ class EditComment(Handler):
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirectJson("/" + str(p.key().id()), dict(
-            category="alert-success", 
+            category="alert-success",
             message="Comment Edit Success!"))
 
 
@@ -432,18 +433,18 @@ class DeleteComment(Handler):
         c = self.getComment()
         p = c.post
         if self.getName() != c.author.name:
-            self.redirect("/%s?%s" % 
-                    (str(p.key().id()), urllib.urlencode(dict(
-                        category="alert-danger", 
-                        message="It's not yours!"))))
+            self.redirect("/%s?%s" %
+                          (str(p.key().id()), urllib.urlencode(dict(
+                              category="alert-danger",
+                              message="It's not yours!"))))
             return
         c.delete()
         # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
         time.sleep(0.1)
         self.redirect("/%s?%s" %
-                (str(p.key().id()), urllib.urlencode(dict(
-                    category="alert-success", 
-                    message="Deleted!!"))))
+                      (str(p.key().id()), urllib.urlencode(dict(
+                          category="alert-success",
+                          message="Deleted!!"))))
 
 
 class SignUp(Handler):
@@ -457,7 +458,7 @@ class SignUp(Handler):
         self.response.write(template.render(template_values))
 
     def post(self):
-        name = self.request.get("username")
+        name = self.request.get("username").replace(' ', '')
         pwd = self.request.get("password")
         verify = self.request.get("verify")
         email = self.request.get("email")
