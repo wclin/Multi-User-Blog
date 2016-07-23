@@ -179,7 +179,7 @@ class Handler(webapp2.RequestHandler):
 
     def getComment(self):
         """
-        Return an Comment object from url request info: comment_id
+    
         """
         comment_id = self.request.get("comment_id")
         key = db.Key.from_path("Comment", int(comment_id))
