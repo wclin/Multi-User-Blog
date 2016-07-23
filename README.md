@@ -16,8 +16,6 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 
 ## Todo
 <ul>
-<li>Users can only edit and delete comments they themselves have made.</li>
-<li>Modal editComment bug and preload</li>
 </ul>
 
 ## Miner
@@ -34,4 +32,5 @@ You can visit the application at this URL: http://localhost:8080/. <br />
 <li>Users can like/unlike posts, but not their own.</li>
 <li>Only signed in users can post comments.</li>
 <li>Modal post create/edit.
+<li>Users can only edit and delete comments they themselves have made.</li>
 </ul>

@@ -324,6 +324,8 @@ class DeletePost(Handler):
                               message="It's not yours!"))))
             return
         p.delete()
+        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
+        time.sleep(0.1)
         self.redirect("/Timeline?%s" % urllib.urlencode(dict(
             category="alert-success", message="Deleted!!")))
 
@@ -436,6 +438,8 @@ class DeleteComment(Handler):
                         message="It's not yours!"))))
             return
         c.delete()
+        # http://stackoverflow.com/questions/16879275/why-webapp2-redirect-to-a-page-but-its-not-reload
+        time.sleep(0.1)
         self.redirect("/%s?%s" %
                 (str(p.key().id()), urllib.urlencode(dict(
                     category="alert-success", 

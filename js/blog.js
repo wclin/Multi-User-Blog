@@ -58,7 +58,10 @@ $(document).ready(function () {
             });
     });
 });
-$("#editCommentModal").addEventListener("load", function(event) {
-    // Need fix
-});
 
+$(document).on("click", ".open-EditConnentModal", function () {
+    var commentId = $(this).data('id'),
+        content = $(this).data('content');
+    $("#editCommentTextArea").val( content );
+    $("#editCommentForm").attr("action", "/EditComment?comment_id=" + commentId);
+});
